@@ -8,12 +8,21 @@ CC = avr32-gcc
 CFLAGS = -Wall -mpart=$(MPART)
 
 PERIPHERALS = peripherals
+DRIVERS = drivers
+ASF = asf
+
 INCLUDES = -I$(PERIPHERALS)
-SOURCES += main.c \
-			$(PERIPHERALS)/flash.c \
+
+SOURCES = main.c
+
+SOURCES += $(PERIPHERALS)/flash.c \
 			$(PERIPHERALS)/pm.c \
 			$(PERIPHERALS)/scif.c \
-			$(PERIPHERALS)/twi.c
+			$(PERIPHERALS)/twi.c \
+			$(PERIPHERALS)/usart.c \
+			$(PERIPHERALS)/spi_master.c
+
+SOURCES += $(DRIVERS)/console.c
 
 OBJECTS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 
@@ -29,6 +38,9 @@ $(BUILDDIR)/%.o: %.c
 
 flash: all
 	cp $(MAIN) $(SHARED)
+
+debug:
+	sudo screen /dev/ttyUSB0 41118
 
 clean:
 	rm $(BUILD)/*

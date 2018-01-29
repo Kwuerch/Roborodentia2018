@@ -3,17 +3,7 @@
 
 // twim_110
 
-#define TWI0_PORT (AVR32_TWIMS0_TWD_0_0_PIN / 32)
-
-#define TWID_PIN  (1 << (AVR32_TWIMS0_TWD_0_0_PIN % 32))
-#define TWICK_PIN (1 << (AVR32_TWIMS0_TWCK_0_0_PIN % 32))
-
 void twi_enable(volatile avr32_twim_t* twim, uint32_t speed, uint32_t pba_hz ){
-    AVR32_GPIO.port[TWI0_PORT].pmr2c = (TWID_PIN | TWICK_PIN);
-    AVR32_GPIO.port[TWI0_PORT].pmr1c = (TWID_PIN | TWICK_PIN);
-    AVR32_GPIO.port[TWI0_PORT].pmr0c = (TWID_PIN | TWICK_PIN);
-    AVR32_GPIO.port[TWI0_PORT].gperc = (TWID_PIN | TWICK_PIN);
-
     uint32_t f_prescaled;
     uint8_t cwgr_exp = 0;
     f_prescaled = (pba_hz / speed / 2);
