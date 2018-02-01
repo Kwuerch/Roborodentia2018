@@ -33,7 +33,7 @@ void twi_enable(volatile avr32_twim_t* twim, uint32_t speed, uint32_t pba_hz ){
     twim->cwgr = ((f_prescaled/2) << AVR32_TWIM_CWGR_LOW_OFFSET)
             | ((f_prescaled - f_prescaled/2) << AVR32_TWIM_CWGR_HIGH_OFFSET)
             | (cwgr_exp << AVR32_TWIM_CWGR_EXP_OFFSET)
-            | (0     << AVR32_TWIM_CWGR_DATA_OFFSET)
+            | (1     << AVR32_TWIM_CWGR_DATA_OFFSET)
             | (f_prescaled << AVR32_TWIM_CWGR_STASTO_OFFSET);
 }
 
