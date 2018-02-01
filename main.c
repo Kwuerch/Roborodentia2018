@@ -43,7 +43,7 @@ void init_twi(){
     AVR32_GPIO.port[TWI0_PORT].pmr0c = (TWID_PIN | TWICK_PIN);
     AVR32_GPIO.port[TWI0_PORT].gperc = (TWID_PIN | TWICK_PIN);
 
-    twi_enable((avr32_twim_t*)AVR32_TWIM0_ADDRESS, 400000, PBA_HZ);
+    twi_enable((avr32_twim_t*)AVR32_TWIM0_ADDRESS, 100000, PBA_HZ);
 }
 
 void init_spi(){
@@ -70,15 +70,15 @@ int main(void){
     pm_divide_clk(PBC_CLK, CLK_DIV_2);
 
     init_twi();
-    init_spi();
+    //init_spi();
     console_init();
 
-    char* test = "Hello\r\n\0";
+    unsigned char* test = (unsigned char*)"Hello\r\n\0";
     while(1){
-        //twi_write(0x29, test, 1);
-        console_print_str(test);
-        AVR32_GPIO.port[1].ovrt = 0x01;
-        spi_write_packet((avr32_spi_t*)AVR32_SPI0_ADDRESS, test, 5);
+        twi_write(0x29, test, 2);
+        //console_print_str(test);
+        //AVR32_GPIO.port[1].ovrt = 0x01;
+        //spi_write_packet((avr32_spi_t*)AVR32_SPI0_ADDRESS, test, 5);
         delay();
 
     }
