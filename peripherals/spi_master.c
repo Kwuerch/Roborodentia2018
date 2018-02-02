@@ -45,10 +45,9 @@
 
 
 #include "spi_master.h"
+#include "config.h"
 
 //SPI0 is on PBC
-#define PBC_HZ 60000000
-
 void spi_master_setup_device(volatile avr32_spi_t *spi,
         struct spi_device *device, spi_flags_t flags, uint32_t baud_rate,
         board_spi_select_id_t sel_id)

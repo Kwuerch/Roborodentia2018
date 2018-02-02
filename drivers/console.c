@@ -1,4 +1,4 @@
-#include "../peripherals/usart.h"
+#include "usart.h"
 
 #define USART ((avr32_usart_t*)AVR32_USART1_ADDRESS)
 

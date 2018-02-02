@@ -1,13 +1,15 @@
 #include <avr32/io.h>
 #include <stdlib.h>
 
-#include "peripherals/flash.h"
-#include "peripherals/pm.h"
-#include "peripherals/scif.h"
-#include "peripherals/twi.h"
-#include "peripherals/usart.h"
-#include "peripherals/spi_master.h"
-#include "drivers/console.h"
+#include "flash.h"
+#include "pm.h"
+#include "scif.h"
+#include "twi.h"
+#include "usart.h"
+#include "spi_master.h"
+#include "console.h"
+#include "config.h"
+#include "vl53l0x.h"
 
 #define TC0_A_PORT (AVR32_TC0_A0_0_0_PIN / 32)
 #define TC0_A_PIN  (1 << (AVR32_TC0_A0_0_0_PIN % 32))
@@ -27,8 +29,6 @@
 #define TWID_PIN  (1 << (AVR32_TWIMS0_TWD_0_0_PIN % 32))
 #define TWICK_PIN (1 << (AVR32_TWIMS0_TWCK_0_0_PIN % 32))
 
-#define PBA_HZ 60000000
-
 void delay(){
     int i;
     for(i=0; i < 100000; i++){
@@ -45,7 +45,6 @@ void init_twi(){
 
     twi_enable((avr32_twim_t*)AVR32_TWIM0_ADDRESS, 100000, PBA_HZ);
 }
-
 void init_spi(){
     //Function B
     AVR32_GPIO.port[SPI0_PORT].pmr2c = (SPI0_MISO_PIN | SPI0_MOSI_PIN | SPI0_SCK_PIN | SPI0_NPCS_0_PIN | SPI0_NPCS_1_PIN | SPI0_NPCS_2_PIN | SPI0_NPCS_3_PIN);
@@ -73,6 +72,12 @@ int main(void){
     //init_spi();
     console_init();
 
+    VL53L0X_Dev_t dev;
+    dev.I2cDevAddr = 0x29;
+
+    vl53l0x_init(&dev);
+    vl53l0x_init_longrange(&dev);
+
     unsigned char* test = (unsigned char*)"Hello\r\n\0";
     while(1){
         twi_write(0x29, test, 2);
@@ -83,16 +88,3 @@ int main(void){
 
     }
 }
-
-    /**
-    AVR32_GPIO.port[TC0_A_PORT].gperc = TC0_A_PIN;
-
-    AVR32_GPIO.port[TC0_A_PORT].pmr2c = TC0_A_PIN;
-    AVR32_GPIO.port[TC0_A_PORT].pmr1c = TC0_A_PIN;
-    AVR32_GPIO.port[TC0_A_PORT].pmr0c = TC0_A_PIN;
-
-    AVR32_TC0.channel[0].ccr = AVR32_TC_CCR0_CLKEN_MASK;
-    AVR32_TC0.channel[0].cmr = AVR32_TC_CMR0_WAVE_MASK | AVR32_TC_CMR0_ACPA_TOGGLE | AVR32_TC_CMR0_WAVSEL_UP_AUTO;
-    AVR32_TC0.channel[0].ra = 1000;
-    **/
-
