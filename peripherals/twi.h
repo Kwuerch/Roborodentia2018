@@ -15,7 +15,9 @@
 
 
 void twi_enable(volatile avr32_twim_t* twim, uint32_t speed, uint32_t pba_hz);
-void twi_write(unsigned char saddr, unsigned char* data, int length);
-void twi_read(unsigned char saddr, unsigned char* buf, int length);
+void twi_write_reg(unsigned char saddr, unsigned char reg, unsigned char* data, int nbytes);
+void twi_read_reg(unsigned char saddr, unsigned char reg, unsigned char* data, int nbytes);
+void twi_write(unsigned char saddr, unsigned char* data, int nbytes);
+void twi_read(unsigned char saddr, unsigned char* buf, int nbytes);
 
 #endif
