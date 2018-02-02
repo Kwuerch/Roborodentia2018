@@ -1,5 +1,6 @@
 #include <avr32/io.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "flash.h"
 #include "pm.h"
@@ -29,6 +30,9 @@
 #define TWID_PIN  (1 << (AVR32_TWIMS0_TWD_0_0_PIN % 32))
 #define TWICK_PIN (1 << (AVR32_TWIMS0_TWCK_0_0_PIN % 32))
 
+#define STR_BUF_SIZE 256
+char strBuf[STR_BUF_SIZE];
+
 void delay(){
     int i;
     for(i=0; i < 100000; i++){
@@ -56,6 +60,8 @@ void init_spi(){
 }
 
 int main(void){
+    VL53L0X_RangingMeasurementData_t meas;
+
     AVR32_GPIO.port[1].gper = 0x0F;
     AVR32_GPIO.port[1].oder = 0x0F;
     AVR32_GPIO.port[1].ovr = 0x00;
@@ -78,13 +84,19 @@ int main(void){
     vl53l0x_init(&dev);
     vl53l0x_init_longrange(&dev);
 
-    unsigned char* test = (unsigned char*)"Hello\r\n\0";
+    //unsigned char* test = (unsigned char*)"Hello\r\n\0";
     while(1){
-        twi_write(0x29, test, 2);
+        VL53L0X_PerformSingleRangingMeasurement(&dev, &meas);
+
+        if(meas.RangeStatus){
+            console_print_str("RangeStatus is not valid\r\n");
+        }else{
+            snprintf(strBuf, STR_BUF_SIZE, "Range(mm): %i\r\n", meas.RangeMilliMeter);
+            console_print_str(strBuf);
+        }
         //console_print_str(test);
-        //AVR32_GPIO.port[1].ovrt = 0x01;
+        AVR32_GPIO.port[1].ovrt = 0x01;
         //spi_write_packet((avr32_spi_t*)AVR32_SPI0_ADDRESS, test, 5);
         delay();
-
     }
 }
