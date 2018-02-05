@@ -107,7 +107,9 @@ VL53L0X_Error VL53L0X_WriteMulti(VL53L0X_DEV Dev, uint8_t index, uint8_t *pdata,
     }
 
 	deviceAddress = Dev->I2cDevAddr;
-    twi_write_reg(deviceAddress, index, pdata, count);
+    if(twi_write_reg(deviceAddress, index, pdata, count) != TWI_OK){
+        Status = VL53L0X_ERROR_UNDEFINED;
+    }
 
     return Status;
 }
@@ -123,7 +125,9 @@ VL53L0X_Error VL53L0X_ReadMulti(VL53L0X_DEV Dev, uint8_t index, uint8_t *pdata, 
     }
 
     deviceAddress = Dev->I2cDevAddr;
-    twi_read_reg(deviceAddress, index, pdata, count);
+    if(twi_read_reg(deviceAddress, index, pdata, count) != TWI_OK){
+        Status = VL53L0X_ERROR_UNDEFINED;
+    }
 
     return Status;
 }
@@ -135,7 +139,9 @@ VL53L0X_Error VL53L0X_WrByte(VL53L0X_DEV Dev, uint8_t index, uint8_t data){
 
     deviceAddress = Dev->I2cDevAddr;
 
-    twi_write_reg(deviceAddress, index, &data, 1);
+    if(twi_write_reg(deviceAddress, index, &data, 1) != TWI_OK){
+        Status = VL53L0X_ERROR_UNDEFINED;
+    }
 
     return Status;
 }
@@ -146,7 +152,9 @@ VL53L0X_Error VL53L0X_WrWord(VL53L0X_DEV Dev, uint8_t index, uint16_t data){
 
     deviceAddress = Dev->I2cDevAddr;
 
-    twi_write_reg(deviceAddress, index, (uint8_t*)&data, 2);
+    if(twi_write_reg(deviceAddress, index, (uint8_t*)&data, 2) != TWI_OK){
+        Status = VL53L0X_ERROR_UNDEFINED;
+    }
 
     return Status;
 }
@@ -157,7 +165,9 @@ VL53L0X_Error VL53L0X_WrDWord(VL53L0X_DEV Dev, uint8_t index, uint32_t data){
 
     deviceAddress = Dev->I2cDevAddr;
 
-    twi_write_reg(deviceAddress, index, (uint8_t*)&data, 4);
+    if(twi_write_reg(deviceAddress, index, (uint8_t*)&data, 4) != TWI_OK){
+        Status = VL53L0X_ERROR_UNDEFINED;
+    }
 
     return Status;
 }
@@ -179,7 +189,9 @@ VL53L0X_Error VL53L0X_RdByte(VL53L0X_DEV Dev, uint8_t index, uint8_t *data){
 
     deviceAddress = Dev->I2cDevAddr;
     
-    twi_read_reg(deviceAddress, index, data, 1);
+    if(twi_read_reg(deviceAddress, index, data, 1) != TWI_OK){
+        Status = VL53L0X_ERROR_UNDEFINED;
+    }
 
     return Status;
 }
@@ -189,7 +201,9 @@ VL53L0X_Error VL53L0X_RdWord(VL53L0X_DEV Dev, uint8_t index, uint16_t *data){
     uint8_t deviceAddress;
 
     deviceAddress = Dev->I2cDevAddr;
-    twi_read_reg(deviceAddress, index, (uint8_t*)data, 2);
+    if(twi_read_reg(deviceAddress, index, (uint8_t*)data, 2) != TWI_OK){
+        Status = VL53L0X_ERROR_UNDEFINED;
+    }
 
     return Status;
 }
@@ -199,7 +213,9 @@ VL53L0X_Error  VL53L0X_RdDWord(VL53L0X_DEV Dev, uint8_t index, uint32_t *data){
     uint8_t deviceAddress;
 
     deviceAddress = Dev->I2cDevAddr;
-    twi_read_reg(deviceAddress, index, (uint8_t*)data, 4);
+    if(twi_read_reg(deviceAddress, index, (uint8_t*)data, 4) != TWI_OK){
+        Status = VL53L0X_ERROR_UNDEFINED;
+    }
 
     return Status;
 }
