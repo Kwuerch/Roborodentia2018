@@ -13,11 +13,28 @@
 #define AVR32_TWIM_SR_STD_MASK  (AVR32_TWIM_SR_NAK_MASK  \
         | AVR32_TWIM_SR_ARBLST_MASK)
 
+typedef enum{
+   TWI_OK = 0,
+   TWI_TIMEOUT,
+   TWI_CUTOFF,
+   TWI_NAK,
+   TWI_RXRDY_TX, /** Receive RXRDY on transmit **/
+   TWI_TXRDY_RX /** Receive TXRDY on transmit **/
+   
+}TWI_STATUS;
+
+typedef enum{
+   TWI_READ = 0,
+   TWI_WRITE
+}TWI_MODE;
+
 
 void twi_enable(volatile avr32_twim_t* twim, uint32_t speed, uint32_t pba_hz);
-void twi_write_reg(unsigned char saddr, unsigned char reg, unsigned char* data, int nbytes);
-void twi_read_reg(unsigned char saddr, unsigned char reg, unsigned char* data, int nbytes);
-void twi_write(unsigned char saddr, unsigned char* data, int nbytes);
-void twi_read(unsigned char saddr, unsigned char* buf, int nbytes);
+TWI_STATUS twi_write_reg(unsigned char saddr, unsigned char reg, unsigned char* data, int nbytes);
+TWI_STATUS twi_read_reg(unsigned char saddr, unsigned char reg, unsigned char* data, int nbytes);
+TWI_STATUS twi_write(unsigned char saddr, unsigned char* data, int nbytes);
+TWI_STATUS twi_read(unsigned char saddr, unsigned char* buf, int nbytes);
+
+void  twi_print_status(TWI_STATUS status);
 
 #endif

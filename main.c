@@ -82,7 +82,7 @@ int main(void){
     dev.I2cDevAddr = 0x29;
 
     vl53l0x_init(&dev);
-    vl53l0x_init_longrange(&dev);
+    //vl53l0x_init_longrange(&dev);
 
     //unsigned char* test = (unsigned char*)"Hello\r\n\0";
     while(1){
@@ -94,6 +94,10 @@ int main(void){
             snprintf(strBuf, STR_BUF_SIZE, "Range(mm): %i\r\n", meas.RangeMilliMeter);
             console_print_str(strBuf);
         }
+
+        //twi_read_reg(dev.I2cDevAddr, 0xCB, buf, 1);
+
+
         //console_print_str(test);
         AVR32_GPIO.port[1].ovrt = 0x01;
         //spi_write_packet((avr32_spi_t*)AVR32_SPI0_ADDRESS, test, 5);
