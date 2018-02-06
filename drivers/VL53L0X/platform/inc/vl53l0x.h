@@ -10,8 +10,10 @@
 
 #define I2C_ADDR 0x29
 
-void vl53l0x_init(VL53L0X_DEV dev);
+VL53L0X_Error vl53l0x_init(VL53L0X_DEV dev);
 
-void vl53l0x_init_longrange(VL53L0X_DEV dev);
+VL53L0X_Error vl53l0x_init_longrange(VL53L0X_DEV dev);
+
+void vl53l0x_print_error(VL53L0X_Error err);
 
 #endif

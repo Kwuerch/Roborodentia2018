@@ -60,6 +60,7 @@ void init_spi(){
 }
 
 int main(void){
+    VL53L0X_Error status = VL53L0X_ERROR_NONE;
     VL53L0X_RangingMeasurementData_t meas;
 
     AVR32_GPIO.port[1].gper = 0x0F;
@@ -81,12 +82,18 @@ int main(void){
     VL53L0X_Dev_t dev;
     dev.I2cDevAddr = 0x29;
 
-    vl53l0x_init(&dev);
+	//if (status == VL53L0X_ERROR_NONE)
+       // status = vl53l0x_init(&dev);
+
+	if (status != VL53L0X_ERROR_NONE)
+        vl53l0x_print_error(status);
+        
+        
     //vl53l0x_init_longrange(&dev);
 
     //unsigned char* test = (unsigned char*)"Hello\r\n\0";
     while(1){
-        VL53L0X_PerformSingleRangingMeasurement(&dev, &meas);
+        status = VL53L0X_PerformSingleRangingMeasurement(&dev, &meas);
 
         if(meas.RangeStatus){
             console_print_str("RangeStatus is not valid\r\n");
@@ -94,6 +101,11 @@ int main(void){
             snprintf(strBuf, STR_BUF_SIZE, "Range(mm): %i\r\n", meas.RangeMilliMeter);
             console_print_str(strBuf);
         }
+
+        /**
+        if (status != VL53L0X_ERROR_NONE)
+            vl53l0x_print_error(status);
+        **/
 
         //twi_read_reg(dev.I2cDevAddr, 0xCB, buf, 1);
 
