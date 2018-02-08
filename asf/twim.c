@@ -8,7 +8,6 @@
  *
  *****************************************************************************/
 #include "twim.h"
-#include <avr32/interrupt.h>
 
 static volatile avr32_twim_t *twim_inst;
 static const volatile uint8_t  *twim_tx_data = NULL;

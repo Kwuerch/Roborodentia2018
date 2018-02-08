@@ -15,6 +15,8 @@
 #include <stdint.h>
 #include "compiler.h"
 #include "status_codes.h"
+#include "conf_twim.h"
+#include "interrupt/interrupt_avr32.h"
 
 #define TWI_STD_MODE_SPEED      (100000 /* kbit/s */)
 
