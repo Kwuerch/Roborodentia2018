@@ -10,6 +10,7 @@
 #include "spi_master.h"
 #include "console.h"
 #include "config.h"
+#include "delay.h"
 #include "vl53l0x.h"
 
 #define TC0_A_PORT (AVR32_TC0_A0_0_0_PIN / 32)
@@ -32,13 +33,6 @@
 
 #define STR_BUF_SIZE 256
 char strBuf[STR_BUF_SIZE];
-
-void delay(){
-    int i;
-    for(i=0; i < 100000; i++){
-        
-    }
-}
 
 void init_twi(){
     //Function A
@@ -67,6 +61,7 @@ int main(void){
     AVR32_GPIO.port[1].oder = 0x0F;
     AVR32_GPIO.port[1].ovr = 0x00;
 
+
     scif_enable_RC120MCR();
     flash_set_wait_state(1);
     pm_divide_clk(CPU_CLK, CLK_DIV_2);
@@ -82,14 +77,23 @@ int main(void){
     VL53L0X_Dev_t dev;
     dev.I2cDevAddr = 0x29;
 
-	//if (status == VL53L0X_ERROR_NONE)
-       // status = vl53l0x_init(&dev);
+    delay_ms(1000);
 
-	if (status != VL53L0X_ERROR_NONE)
+    if (status == VL53L0X_ERROR_NONE){
+        status = vl53l0x_init(&dev);
+    }
+
+	if (status != VL53L0X_ERROR_NONE){
         vl53l0x_print_error(status);
+        while(1){
+            AVR32_GPIO.port[1].ovrt = 0x01;
+            //console_print_str("Could Not Initialize VL53L0X Sensor\r\n");
+            delay_ms(250);
+        }
+    }
         
         
-    //vl53l0x_init_longrange(&dev);
+    vl53l0x_init_longrange(&dev);
 
     //unsigned char* test = (unsigned char*)"Hello\r\n\0";
     while(1){
@@ -103,6 +107,11 @@ int main(void){
         }
 
         /**
+        snprintf(strBuf, STR_BUF_SIZE, "Range(mm): %i\r\n", meas.RangeMilliMeter);
+        console_print_str(strBuf);
+        **/
+
+        /**
         if (status != VL53L0X_ERROR_NONE)
             vl53l0x_print_error(status);
         **/
@@ -111,8 +120,8 @@ int main(void){
 
 
         //console_print_str(test);
-        AVR32_GPIO.port[1].ovrt = 0x01;
+        //AVR32_GPIO.port[1].ovrt = 0x01;
         //spi_write_packet((avr32_spi_t*)AVR32_SPI0_ADDRESS, test, 5);
-        delay();
+        delay_ms(10);
     }
 }

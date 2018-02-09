@@ -4,29 +4,45 @@
 VL53L0X_Error vl53l0x_init(VL53L0X_DEV dev){
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
 
-	if (Status == VL53L0X_ERROR_NONE)
-        Status = VL53L0X_DataInit(dev);
+    uint32_t refSpadCount;
+    uint8_t isAperatureSpads;
+    uint8_t vhvSettings;
+    uint8_t phaseCal;
 
-	if (Status == VL53L0X_ERROR_NONE)
+	if (Status == VL53L0X_ERROR_NONE){
+        Status = VL53L0X_DataInit(dev);
+    }
+
+	if (Status == VL53L0X_ERROR_NONE){
         Status = VL53L0X_StaticInit(dev);
+    }
+
+    if(Status == VL53L0X_ERROR_NONE){
+        Status = VL53L0X_PerformRefSpadManagement(dev, &refSpadCount, &isAperatureSpads);
+    }
+
+    if(Status == VL53L0X_ERROR_NONE){
+        Status = VL53L0X_PerformRefCalibration(dev, &vhvSettings, &phaseCal);
+    }
 
     /**
-     * VL53L0X_PerformRefSpadMeasurement(pMyDevice, &refSpadCount, &isAperatureSpads)
-     * VL53L0X_PerformRefCalibration(pMyDevice, &vhvSettings, &phaseCal)
-     *
-     * VL53L0X_SetDeviceMode
      * VL53L0X_Set_offsetCalbirationDataMicroMeter();
      */
 
 
-	if (Status == VL53L0X_ERROR_NONE)
+	if (Status == VL53L0X_ERROR_NONE){
         Status = VL53L0X_SetDeviceMode(dev, VL53L0X_DEVICEMODE_SINGLE_RANGING);
+    }
+
+    if(Status != VL53L0X_ERROR_NONE){
+        console_print_str("Initialization Error\r\n");
+    }
 
     return Status;
 }
 
 VL53L0X_Error vl53l0x_init_longrange(VL53L0X_DEV dev){
-    VL53L0X_Error Status;
+    VL53L0X_Error Status = VL53L0X_ERROR_NONE;
 
 	if (Status == VL53L0X_ERROR_NONE)
         Status = VL53L0X_SetLimitCheckValue(dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, (FixPoint1616_t)(0.1*65536));
@@ -92,6 +108,9 @@ void vl53l0x_print_error(VL53L0X_Error status){
             break;
         case VL53L0X_ERROR_NOT_IMPLEMENTED:
             console_print_str("Error Not Implemented\r\n");
+            break;
+        default:
+            console_print_str("Error Not Caught\r\n");
             break;
     }
 }

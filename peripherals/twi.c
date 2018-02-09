@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "console.h"
+#include "delay.h"
 #include "twi.h"
 
 // twim_110
@@ -29,21 +30,28 @@ void twi_enable(volatile avr32_twim_t* twim, uint32_t speed, uint32_t pba_hz ){
 char num[100];
 TWI_STATUS twi_run(volatile avr32_twim_t* twim, TWI_MODE mode, uint8_t* data, int nbytes){
     TWI_STATUS ts = TWI_OK;
+
     // Enable master transfer
     twim->cr = AVR32_TWIM_CR_MEN_MASK;
 
     while(1){
         if(twim->sr & (AVR32_TWIM_SR_NAK_MASK | AVR32_TWIM_SR_TXRDY_MASK | AVR32_TWIM_SR_RXRDY_MASK | AVR32_TWIM_SR_CCOMP_MASK)){
             uint32_t status = twim->sr;
+            int timeout = 0;
 
-            snprintf(num, 100, "NBYTES: %i\r\n", nbytes);
-            console_print_str(num);
             int rbts = (twim->cmdr & AVR32_TWIM_CMDR_NBYTES_MASK) >> AVR32_TWIM_CMDR_NBYTES_OFFSET;
+            delay_100_us();
+            delay_100_us();
+            delay_100_us();
 
             if(rbts < nbytes){
                 ts = TWI_TIMEOUT;
                 break;
             }else if(rbts > nbytes){
+                if(timeout++ > 10){
+                    break;
+                    ts = TWI_TIMEOUT;
+                }
                 continue;
             }
 
@@ -58,37 +66,32 @@ TWI_STATUS twi_run(volatile avr32_twim_t* twim, TWI_MODE mode, uint8_t* data, in
 
             } else if (status & AVR32_TWIM_SR_RXRDY_MASK) {
                 if(mode == TWI_WRITE){
-                    twim->CMDR.valid = 0;
                     ts = TWI_RXRDY_TX;
-                    break;
+                    continue;
                 }
 
-                console_print_str("RXRDY\r\n");
                 *data = twim->rhr;
                 data++;
                 nbytes--;
-
             } else if (status & AVR32_TWIM_SR_TXRDY_MASK) {
-                twim->scr |= AVR32_TWIM_SR_TXRDY_MASK;
                 if(mode == TWI_READ){
-                    twim->CMDR.valid = 0;
-                    ts = TWI_TXRDY_RX;
-                    continue; 
+                    *data = twim->rhr;
+                    data++;
+                    nbytes--;
+                }else{
+                    twim->thr = *data++;
+                    nbytes--;
                 }
-
-                console_print_str("TXRDY\r\n");
-                twim->thr = *data++;
-                nbytes--;
             }
         }
-
-        console_print_str("Waiting\r\n");
     }
 
     if(ts != TWI_OK){
         twi_print_status(ts);
+        twim->cr |= AVR32_TWIM_CR_STOP;
     }
 
+    twim->scr |= AVR32_TWIM_TXRDY_MASK | AVR32_TWIM_RXRDY_MASK;
     twim->cr = AVR32_TWIM_CR_MDIS_MASK;
     return ts;
 }

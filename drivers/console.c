@@ -1,4 +1,5 @@
 #include "usart.h"
+#include "console.h"
 
 #define USART ((avr32_usart_t*)AVR32_USART1_ADDRESS)
 
@@ -28,6 +29,7 @@ void init_usart(){
 
 void console_init(){
     init_usart();
+    console_print_str("Hello\r\n");
 }
 
 void console_print(char c){
