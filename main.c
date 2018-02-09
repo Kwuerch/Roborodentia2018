@@ -77,10 +77,12 @@ int main(void){
     VL53L0X_Dev_t dev;
     dev.I2cDevAddr = 0x29;
 
-    delay_ms(1000);
-
     if (status == VL53L0X_ERROR_NONE){
         status = vl53l0x_init(&dev);
+    }
+    
+    if(status == VL53L0X_ERROR_NONE){
+        status = vl53l0x_init_longrange(&dev);
     }
 
 	if (status != VL53L0X_ERROR_NONE){
@@ -91,9 +93,6 @@ int main(void){
             delay_ms(250);
         }
     }
-        
-        
-    vl53l0x_init_longrange(&dev);
 
     //unsigned char* test = (unsigned char*)"Hello\r\n\0";
     while(1){
