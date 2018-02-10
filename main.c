@@ -75,16 +75,25 @@ int main(void){
     console_init();
 
     VL53L0X_Dev_t dev;
-    dev.I2cDevAddr = 0x29;
+    dev.I2cDevAddr = 0x29;//VL53L0X_I2C_ADDR1;
+
+    /**
+    console_print_str("Starting Calibration in 3s...\r\n");
+    delay_ms(3000);
+    vl53l0x_calibrate(&dev);
+    while(1){
+        AVR32_GPIO.port[1].ovrt = 0x01;
+        //console_print_str("Could Not Initialize VL53L0X Sensor\r\n");
+        delay_ms(250);
+    }
+    **/
+
 
     if (status == VL53L0X_ERROR_NONE){
         status = vl53l0x_init(&dev);
     }
-    
-    if(status == VL53L0X_ERROR_NONE){
-        status = vl53l0x_init_longrange(&dev);
-    }
 
+    
 	if (status != VL53L0X_ERROR_NONE){
         vl53l0x_print_error(status);
         while(1){

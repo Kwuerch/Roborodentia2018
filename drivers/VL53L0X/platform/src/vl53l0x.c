@@ -1,5 +1,6 @@
 #include "vl53l0x.h"
 #include "console.h"
+#include "delay.h"
 
 VL53L0X_Error vl53l0x_init(VL53L0X_DEV dev){
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
@@ -36,6 +37,71 @@ VL53L0X_Error vl53l0x_init(VL53L0X_DEV dev){
 
     if(Status != VL53L0X_ERROR_NONE){
         console_print_str("Initialization Error\r\n");
+    }
+
+    return Status;
+}
+
+VL53L0X_Error vl53l0x_set_address(VL53L0X_DEV dev, uint8_t addr){
+	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
+
+	if (Status == VL53L0X_ERROR_NONE){
+        Status = VL53L0X_DataInit(dev);
+    }
+
+    if(Status == VL53L0X_ERROR_NONE && addr != VL53L0X_DEFAULT_ADDR){
+        Status = VL53L0X_SetDeviceAddress(dev, addr*2);
+        dev ->  I2cDevAddr = addr;
+    }
+
+    return Status;
+}
+
+VL53L0X_Error vl53l0x_calibrate(VL53L0X_DEV dev){
+	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
+
+    uint32_t refSpadCount;
+    uint8_t isAperatureSpads;
+    uint8_t vhvSettings;
+    uint8_t phaseCal;
+    int32_t offsetMicroMeter;
+    FixPoint1616_t calDistanceMilliMeter = 200;
+    FixPoint1616_t XTalkCalDistance = 200;
+    FixPoint1616_t xTalkCompensationRate;
+
+
+	if (Status == VL53L0X_ERROR_NONE){
+        Status = VL53L0X_DataInit(dev);
+    }
+
+	if (Status == VL53L0X_ERROR_NONE){
+        Status = VL53L0X_StaticInit(dev);
+    }
+
+    if(Status == VL53L0X_ERROR_NONE){
+        Status = VL53L0X_PerformRefSpadManagement(dev, &refSpadCount, &isAperatureSpads);
+    }
+
+    if(Status == VL53L0X_ERROR_NONE){
+        Status = VL53L0X_PerformRefCalibration(dev, &vhvSettings, &phaseCal);
+    }
+
+    console_print_str("Performing Offset Calibration in 3s... Set White Target\r\n");
+    delay_ms(3000);
+
+    if(Status == VL53L0X_ERROR_NONE){
+        Status = VL53L0X_PerformOffsetCalibration(dev, calDistanceMilliMeter, &offsetMicroMeter);
+    }
+
+    console_print_str("Performing XTalk Calibration in 3s... Set Grey Target\r\n");
+    delay_ms(3000);
+
+    if(Status == VL53L0X_ERROR_NONE){
+        Status = VL53L0X_PerformXTalkCalibration(dev, XTalkCalDistance, &xTalkCompensationRate);
+    }
+
+    if(Status != VL53L0X_ERROR_NONE){
+        console_print_str("Calibration Error\r\n");
     }
 
     return Status;
