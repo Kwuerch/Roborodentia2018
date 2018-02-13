@@ -1,4 +1,6 @@
 #include "drv8711.h"
+#include "spi_master.h"
+#include <avr32/io.h>
 
  /*------------------------------------------Write Message---------------------------------------------------------\
  *     *      *     *      *       *       *      *      *      *      *      *      *      *      *      *      *
@@ -14,28 +16,30 @@
 
 
 uint16_t drv8711_read_reg(volatile avr32_spi_t* spi, struct spi_device* dev, uint8_t reg){
-    spi->mode &= ~AVR32_SPI_MR_PCS_MASK
-    spi->mode |= AVR32_SPI_MR_PCS_MASK & ((dev -> id) << AVR32_SPI_MR_PCS_OFFSET);
+    spi->mr &= ~AVR32_SPI_MR_PCS_MASK;
+    spi->mr |= AVR32_SPI_MR_PCS_MASK & ((dev -> id) << AVR32_SPI_MR_PCS_OFFSET);
 
-    unsigned long* csrReg;
+    volatile unsigned long* csrReg;
     switch(dev -> id){
         case 0:
-            csrReg = spi.csr0;
+            csrReg = &(spi->csr0);
             break;
         case 1:
-            csrReg = spi.csr1;
+            csrReg = &(spi->csr1);
             break;
         case 2:
-            csrReg = spi.csr2;
+            csrReg = &(spi->csr2);
             break;
-        case 3
-            csrReg = spi.csr3;
+        case 3:
+            csrReg = &(spi->csr3);
             break;
         default:
-            return;
+            return 0;
     }
 
     /** USE independent GPIOs instead to match active HIGH of DRV7811 -- IS that even possible if want to write 4 bit words?? **/
+
+    #define AVR32_SPI_CSR0_BITS_4_BPT 0x09
 
     /** Set to 4 bit mode **/
     *csrReg &= ~AVR32_SPI_CSR0_BITS_MASK; 
