@@ -104,6 +104,8 @@ VL53L0X_Error vl53l0x_calibrate(VL53L0X_DEV dev){
         console_print_str("Calibration Error\r\n");
     }
 
+    while(1);
+
     return Status;
 }
 

@@ -45,11 +45,11 @@
 
 
 #include "spi_master.h"
-#include "config.h"
+#include "board.h"
 
 //SPI0 is on PBC
 void spi_master_setup_device(volatile avr32_spi_t *spi,
-        struct spi_device *device, spi_flags_t flags, uint32_t baud_rate,
+        struct spi_device *device, spi_flags_t flags, uint32_t baud_div,
         board_spi_select_id_t sel_id)
 {
     spi_set_chipselect_delay_bct(spi,device->id,CONFIG_SPI_MASTER_DELAY_BCT);
@@ -57,11 +57,7 @@ void spi_master_setup_device(volatile avr32_spi_t *spi,
     spi_set_bits_per_transfer(spi,device->id,
             CONFIG_SPI_MASTER_BITS_PER_TRANSFER);
 
-    /** Will this work??? **/
-    /**
-    spi_set_baudrate_register(spi,device->id,
-            getBaudDiv(baud_rate, PBC_HZ));
-    **/
+    spi_set_baudrate_register(spi,device->id, baud_div);
 
     spi_enable_active_mode(spi,device->id);
     spi_set_mode(spi,device->id,flags);

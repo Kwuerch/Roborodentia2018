@@ -29,7 +29,10 @@ SOURCES += $(PERIPHERALS)/flash.c \
 			$(PERIPHERALS)/usart.c \
 			$(PERIPHERALS)/spi_master.c
 
+SOURCES += $(CONFIG)/board.c
+
 SOURCES += $(DRIVERS)/console.c \
+			$(DRIVERS)/drv8711.c \
 			$(DRIVERS)/delay.c
 
 SOURCES += $(VL53L0X)/core/src/vl53l0x_api.c \
