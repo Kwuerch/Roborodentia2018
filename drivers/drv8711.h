@@ -2,9 +2,11 @@
 #define DRV8711_H_
 
 #include <stdint.h>
+#include "spi_master.h"
 
 #define DRV8711_ADDR_OFFSET 12
 #define DRV8711_WRITE_ADDR_MASK 0x7000
+#define DRV8711_WRITE_DATA_MASK 0x0FFF
 #define DRV8711_WRITE_MASK 0x8000
 #define DRV8711_READ_MASK 0x8000
 
@@ -141,5 +143,9 @@ typedef struct drv8711_torque{
    uint8_t torque;
    DRV8711_SMPLTH smpl;
 }drv8711_torque_t;
+
+uint16_t drv8711_read_reg(volatile avr32_spi_t* spi, uint8_t csid, uint8_t reg);
+void drv8711_write_reg(volatile avr32_spi_t* spi, uint8_t csid, uint8_t reg, uint16_t data);
+void drv8711_init();
 
 #endif

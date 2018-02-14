@@ -12,6 +12,7 @@
 #include "console.h"
 #include "delay.h"
 #include "vl53l0x.h"
+#include "drv8711.h"
 
 
 #define STR_BUF_SIZE 256
@@ -58,8 +59,23 @@ int main(void){
     }
     **/
 
+    AVR32_GPIO.port[2].gpers = 0x01;
+    AVR32_GPIO.port[2].oders = 0x01;
+    AVR32_GPIO.port[2].ovrs = 0x01;
+
+    delay_ms(1);
+
+    AVR32_GPIO.port[2].ovrc = 0x01;
+
+    drv8711_init();
+
+    uint16_t data;
     //unsigned char* test = (unsigned char*)"Hello\r\n\0";
     while(1){
+        data = drv8711_read_reg((avr32_spi_t*)AVR32_SPI0_ADDRESS, 0, 0x00);
+
+        snprintf(strBuf, STR_BUF_SIZE, "Read 0x00: %X\r\n", data);
+        console_print_str(strBuf);
         /**
         status = VL53L0X_PerformSingleRangingMeasurement(&dev, &meas);
 

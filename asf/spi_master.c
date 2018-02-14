@@ -50,7 +50,8 @@ void spi_master_setup_device(volatile avr32_spi_t *spi,
         struct spi_device *device, spi_flags_t flags, uint8_t baud_div,
         board_spi_select_id_t sel_id)
 {
-    spi_set_chipselect_delay_bct(spi,device->id,CONFIG_SPI_MASTER_DELAY_BCT);
+    //spi_set_chipselect_delay_bct(spi,device->id,CONFIG_SPI_MASTER_DELAY_BCT);
+    spi_set_chipselect_delay_bct(spi,device->id,188);
     spi_set_chipselect_delay_bs(spi,device->id,CONFIG_SPI_MASTER_DELAY_BS);
     spi_set_bits_per_transfer(spi,device->id,
             CONFIG_SPI_MASTER_BITS_PER_TRANSFER);
