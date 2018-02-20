@@ -18,11 +18,17 @@
 #define SPI0_NPCS_2_PIN (1 << (AVR32_SPI0_NPCS_2_PIN % 32))
 #define SPI0_NPCS_3_PIN (1 << (AVR32_SPI0_NPCS_3_PIN % 32))
 
-#define SPI_CS_PORT 1 // Port B
-#define SPI_CS0 4
-#define SPI_CS1 5
-#define SPI_CS2 6
-#define SPI_CS3 7
+#define SPI_CS_PORT 3
+#define SPI_CS0 3
+#define SPI_CS1 4
+#define SPI_CS2 5
+#define SPI_CS3 6
+
+/** CSID Values **/
+#define DRV8711_FL 0
+#define DRV8711_BR 1
+#define DRV8711_FR 2
+#define DRV8711_BL 3
 
 #define TWI0_PORT (AVR32_TWIMS0_TWD_0_0_PIN / 32)
 

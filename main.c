@@ -67,12 +67,15 @@ int main(void){
 
     AVR32_GPIO.port[2].ovrc = 0x01;
 
-    drv8711_init();
+    drv8711_init(DRV8711_FL);
+    drv8711_init(DRV8711_BR);
+    drv8711_init(DRV8711_FR);
+    drv8711_init(DRV8711_BL);
 
     uint16_t data;
     //unsigned char* test = (unsigned char*)"Hello\r\n\0";
     while(1){
-        data = drv8711_read_reg((avr32_spi_t*)AVR32_SPI0_ADDRESS, 0, 0x00);
+        data = drv8711_read_status(DRV8711_FL);
 
         snprintf(strBuf, STR_BUF_SIZE, "Read 0x00: %X\r\n", data);
         console_print_str(strBuf);

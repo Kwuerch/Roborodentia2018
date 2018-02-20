@@ -12,6 +12,7 @@ void init_twi(){
 
     twi_enable((avr32_twim_t*)AVR32_TWIM0_ADDRESS, TWI_SPEED, PBA_HZ);
 }
+
 void init_spi(){
     /** Initialize SPI pins - Function A**/
     AVR32_GPIO.port[SPI0_PORT].pmr2c = (SPI0_MISO_PIN | SPI0_MOSI_PIN | SPI0_SCK_PIN );
@@ -20,9 +21,9 @@ void init_spi(){
     AVR32_GPIO.port[SPI0_PORT].gperc = (SPI0_MISO_PIN | SPI0_MOSI_PIN | SPI0_SCK_PIN );
 
     /** Initialize CS Pins **/
-    AVR32_GPIO.port[SPI0_PORT].gpers = (SPI0_NPCS_0_PIN | SPI0_NPCS_1_PIN | SPI0_NPCS_2_PIN | SPI0_NPCS_3_PIN);
-    AVR32_GPIO.port[SPI0_PORT].oders = (SPI0_NPCS_0_PIN | SPI0_NPCS_1_PIN | SPI0_NPCS_2_PIN | SPI0_NPCS_3_PIN);
-    AVR32_GPIO.port[SPI0_PORT].ovrc = (SPI0_NPCS_0_PIN | SPI0_NPCS_1_PIN | SPI0_NPCS_2_PIN | SPI0_NPCS_3_PIN);
+    AVR32_GPIO.port[SPI_CS_PORT].gpers = (SPI_CS0 | SPI_CS1 | SPI_CS2 | SPI_CS3);
+    AVR32_GPIO.port[SPI_CS_PORT].oders = (SPI_CS0 | SPI_CS1 | SPI_CS2 | SPI_CS3);
+    AVR32_GPIO.port[SPI_CS_PORT].ovrc = (SPI_CS0 | SPI_CS1 | SPI_CS2 | SPI_CS3);
 
     struct spi_device spi_device_conf = {
         .id = 0
