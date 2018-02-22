@@ -7,6 +7,7 @@
 #include "vl53l0x_api_core.h"
 #include "vl53l0x_api_ranging.h"
 #include "vl53l0x_api_strings.h"
+#include "board.h"
 
 #define VL53L0X_DEFAULT_ADDR 0x29
 
@@ -21,5 +22,7 @@ VL53L0X_Error vl53l0x_calibrate(VL53L0X_DEV dev);
 void vl53l0x_print_error(VL53L0X_Error err);
 
 void vl53l0x_init_all();
+
+uint16_t vl53l0x_measure(VL53L0X_ID id);
 
 #endif

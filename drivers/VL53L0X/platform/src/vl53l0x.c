@@ -6,6 +6,12 @@
 
 VL53L0X_Error vl53l0x_set_address(VL53L0X_DEV dev, uint8_t addr);
 
+VL53L0X_Dev_t dev_f = {.I2cDevAddr = VL53L0X_ADDR_F, .pin = VL53L0X_SD_PIN_F};
+VL53L0X_Dev_t dev_b = {.I2cDevAddr = VL53L0X_ADDR_B, .pin = VL53L0X_SD_PIN_B};
+VL53L0X_Dev_t dev_r = {.I2cDevAddr = VL53L0X_ADDR_R, .pin = VL53L0X_SD_PIN_R};
+VL53L0X_Dev_t dev_l = {.I2cDevAddr = VL53L0X_ADDR_L, .pin = VL53L0X_SD_PIN_L};
+
+
 VL53L0X_Error vl53l0x_init(VL53L0X_DEV dev){
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
 
@@ -193,40 +199,34 @@ void vl53l0x_print_error(VL53L0X_Error status){
     }
 }
 
-void vl53l0x_init_dev(VL53L0X_SENSOR id){
+void vl53l0x_init_dev(VL53L0X_ID id){
     VL53L0X_Error status = VL53L0X_ERROR_NONE;
-    uint8_t addr;
-    uint8_t pin;
+    VL53L0X_Dev_t* dev;
 
     switch(id){
         case VL53L0X_F:
-            addr = VL53L0X_I2C_F;
-            pin = VL53L0X_SD_F;
+            dev = &dev_f;
             break;
+
         case VL53L0X_B:
-            addr = VL53L0X_I2C_B;
-            pin = VL53L0X_SD_B;
+            dev = &dev_b;
             break;
+
         case VL53L0X_R:
-            addr = VL53L0X_I2C_R;
-            pin = VL53L0X_SD_R;
+            dev = &dev_r;
             break;
+
         case VL53L0X_L:
-            addr = VL53L0X_I2C_L;
-            pin = VL53L0X_SD_L;
+            dev = &dev_l;
             break;
+
         default:
-            addr = VL53L0X_DEFAULT_ADDR;
             return;
     }
 
-    VL53L0X_Dev_t dev;
-    //dev.I2cDevAddr = addr;
-    dev.I2cDevAddr = 0x29;
     
-    AVR32_GPIO.port[VL53L0X_PORT].ovrc = pin;
-    console_printf("Pin is %i\r\n", pin);
-    status = vl53l0x_init(&dev);
+    AVR32_GPIO.port[VL53L0X_PORT].ovrc = dev -> pin; 
+    status = vl53l0x_init(dev);
 
     if(status != VL53L0X_ERROR_NONE){
         vl53l0x_print_error(status);
@@ -237,8 +237,49 @@ void vl53l0x_init_all(){
     /** Initialize Pins & Shutdown **/
     init_vl53l0x_sd();
 
+    /** TODO - FIX THIS WHEN ALL SENSORS ARE READY **/
     //vl53l0x_init_dev(VL53L0X_F);
     //vl53l0x_init_dev(VL53L0X_B);
     vl53l0x_init_dev(VL53L0X_R);
     //vl53l0x_init_dev(VL53L0X_L);
+}
+
+/** Returns 0 for invalid measurement **/
+uint16_t vl53l0x_measure(VL53L0X_ID id){
+    VL53L0X_Error status = VL53L0X_ERROR_NONE;
+    VL53L0X_RangingMeasurementData_t meas;
+    VL53L0X_Dev_t* dev;
+
+    switch(id){
+        case VL53L0X_F:
+            dev = &dev_f;
+            break;
+
+        case VL53L0X_B:
+            dev = &dev_b;
+            break;
+
+        case VL53L0X_R:
+            dev = &dev_r;
+            break;
+
+        case VL53L0X_L:
+            dev = &dev_l;
+            break;
+
+        default:
+            return 0;
+    }
+
+    status = VL53L0X_PerformSingleRangingMeasurement(dev, &meas);
+
+    if(status != VL53L0X_ERROR_NONE){
+        vl53l0x_print_error(status);
+    }
+
+    if(meas.RangeStatus){
+        return 0;
+    }
+
+    return meas.RangeMilliMeter;
 }

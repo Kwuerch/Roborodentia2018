@@ -42,10 +42,10 @@
 #define SPI0_NPCS_3_PIN (1 << (AVR32_SPI0_NPCS_3_PIN % 32))
 
 #define SPI_CS_PORT 3
-#define SPI_CS0_PIN (1 << 3)
-#define SPI_CS1_PIN (1 << 4)
-#define SPI_CS2_PIN (1 << 5)
-#define SPI_CS3_PIN (1 << 6)
+#define SPI_CS0_PIN ((uint32_t)(1 << 3))
+#define SPI_CS1_PIN ((uint32_t)(1 << 4))
+#define SPI_CS2_PIN ((uint32_t)(1 << 5))
+#define SPI_CS3_PIN ((uint32_t)(1 << 6))
 
 /** DRV8711 Motor Driver **/
 typedef enum DRV8711_ID{
@@ -56,23 +56,23 @@ typedef enum DRV8711_ID{
 }DRV8711_ID;
 
 /** VL53L0X Sensor **/
-typedef enum VL53L0X_SENSOR_ID{
+typedef enum VL53L0X_ID{
    VL53L0X_F = 0,
    VL53L0X_B,
    VL53L0X_L,
    VL53L0X_R
-}VL53L0X_SENSOR_ID;
+}VL53L0X_ID;
 
-#define VL53L0X_I2C_F 0x20
-#define VL53L0X_I2C_B 0x21
-#define VL53L0X_I2C_L 0x22
-#define VL53L0X_I2C_R 0x23
+#define VL53L0X_ADDR_F ((uint8_t)0x20)
+#define VL53L0X_ADDR_B ((uint8_t)0x21)
+#define VL53L0X_ADDR_L ((uint8_t)0x22)
+#define VL53L0X_ADDR_R ((uint8_t)0x23)
 
 #define VL53L0X_PORT 2
-#define VL53L0X_SD_F_PIN (1 << 9)
-#define VL53L0X_SD_B_PIN (1 << 10)
-#define VL53L0X_SD_L_PIN (1 << 11)
-#define VL53L0X_SD_R_PIN (1 << 12)
+#define VL53L0X_SD_PIN_F ((uint32_t)(1 << 9))
+#define VL53L0X_SD_PIN_B ((uint32_t)(1 << 10))
+#define VL53L0X_SD_PIN_L ((uint32_t)(1 << 11))
+#define VL53L0X_SD_PIN_R ((uint32_t)(1 << 12))
 
 /** Function Prototypes **/
 void init_twi();

@@ -22,9 +22,9 @@ void init_spi(){
     AVR32_GPIO.port[SPI0_PORT].gperc = (SPI0_MISO_PIN | SPI0_MOSI_PIN | SPI0_SCK_PIN );
 
     /** Initialize CS Pins **/
-    AVR32_GPIO.port[SPI_CS_PORT].gpers = (SPI_CS0 | SPI_CS1 | SPI_CS2 | SPI_CS3);
-    AVR32_GPIO.port[SPI_CS_PORT].oders = (SPI_CS0 | SPI_CS1 | SPI_CS2 | SPI_CS3);
-    AVR32_GPIO.port[SPI_CS_PORT].ovrc = (SPI_CS0 | SPI_CS1 | SPI_CS2 | SPI_CS3);
+    AVR32_GPIO.port[SPI_CS_PORT].gpers = (SPI_CS0_PIN | SPI_CS1_PIN | SPI_CS2_PIN | SPI_CS3_PIN);
+    AVR32_GPIO.port[SPI_CS_PORT].oders = (SPI_CS0_PIN | SPI_CS1_PIN | SPI_CS2_PIN | SPI_CS3_PIN);
+    AVR32_GPIO.port[SPI_CS_PORT].ovrc = (SPI_CS0_PIN | SPI_CS1_PIN | SPI_CS2_PIN | SPI_CS3_PIN);
 
     struct spi_device spi_device_conf = {
         .id = 0
@@ -54,7 +54,7 @@ void init_usart(){
 
 /** Initialize Shutdown Pins for VL53L0X **/
 void init_vl53l0x_sd(){
-    AVR32_GPIO.port[VL53L0X_PORT].gpers = (VL53L0X_SD_R | VL53L0X_SD_L | VL53L0X_SD_F | VL53L0X_SD_B);
-    AVR32_GPIO.port[VL53L0X_PORT].oders = (VL53L0X_SD_R | VL53L0X_SD_L | VL53L0X_SD_F | VL53L0X_SD_B);
-    AVR32_GPIO.port[VL53L0X_PORT].ovrs = (VL53L0X_SD_R | VL53L0X_SD_L | VL53L0X_SD_F | VL53L0X_SD_B);
+    AVR32_GPIO.port[VL53L0X_PORT].gpers = (VL53L0X_SD_PIN_R | VL53L0X_SD_PIN_L | VL53L0X_SD_PIN_F | VL53L0X_SD_PIN_B);
+    AVR32_GPIO.port[VL53L0X_PORT].oders = (VL53L0X_SD_PIN_R | VL53L0X_SD_PIN_L | VL53L0X_SD_PIN_F | VL53L0X_SD_PIN_B);
+    AVR32_GPIO.port[VL53L0X_PORT].ovrs = (VL53L0X_SD_PIN_R | VL53L0X_SD_PIN_L | VL53L0X_SD_PIN_F | VL53L0X_SD_PIN_B);
 }

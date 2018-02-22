@@ -40,31 +40,8 @@ int main(void){
     drv8711_init(DRV8711_FR);
     drv8711_init(DRV8711_BL);
 
-    uint16_t data;
-    uint16_t vldata;
-    VL53L0X_RangingMeasurementData_t meas;
-    //unsigned char* test = (unsigned char*)"Hello\r\n\0";
-
     while(1){
-        //data = drv8711_read_status(DRV8711_FL);
-        //vldata = vl53l0x_measure(VL53L0X_F);
-        console_printf("Hello %i\r\n", 67);
-
-        /**
-        status = VL53L0X_PerformSingleRangingMeasurement(&dev, &meas);
-
-        if(meas.RangeStatus){
-            console_print_str("RangeStatus is not valid\r\n");
-        }else{
-            snprintf(strBuf, STR_BUF_SIZE, "Range(mm): %i\r\n", meas.RangeMilliMeter);
-            console_print_str(strBuf);
-        }
-        **/
-
-        /**
-        snprintf(strBuf, STR_BUF_SIZE, "Range(mm): %i\r\n", meas.RangeMilliMeter);
-        console_print_str(strBuf);
-        **/
+        console_printf("Range (mm): %i\r\n", vl53l0x_measure(VL53L0X_R));
 
         delay_ms(100);
     }
