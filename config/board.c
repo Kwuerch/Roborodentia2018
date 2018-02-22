@@ -1,6 +1,7 @@
 #include <avr32/io.h>
 #include "board.h"
 #include "spi_master.h"
+#include "usart.h"
 #include "twi.h"
 
 void init_twi(){
@@ -33,4 +34,20 @@ void init_spi(){
     spi_master_init((avr32_spi_t*)AVR32_SPI0_ADDRESS);
     spi_master_setup_device((avr32_spi_t*)AVR32_SPI0_ADDRESS, &spi_device_conf, SPI_MODE_0, 30, 0);
     AVR32_SPI0.cr  |= AVR32_SPI_CR_SPIEN_MASK;
+}
+
+void init_usart(){
+    AVR32_GPIO.port[USART1_PORT].pmr2c = (RX_PIN | TX_PIN);
+    AVR32_GPIO.port[USART1_PORT].pmr1c = (RX_PIN | TX_PIN);
+    AVR32_GPIO.port[USART1_PORT].pmr0c = (RX_PIN | TX_PIN);
+    AVR32_GPIO.port[USART1_PORT].gperc = (RX_PIN | TX_PIN);
+
+    usart_options_t opts;
+    opts.baudrate = 38400;
+    opts.charlength = 8;
+    opts.paritytype = USART_NO_PARITY;
+    opts.stopbits = USART_1_STOPBIT;
+    opts.channelmode = USART_NORMAL_CHMODE;
+
+    usart_init_rs232(USART, &opts, PBA_HZ);
 }

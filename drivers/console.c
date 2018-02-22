@@ -1,35 +1,25 @@
-#include "usart.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include "board.h"
 #include "console.h"
+#include "usart.h"
 
-#define USART ((avr32_usart_t*)AVR32_USART1_ADDRESS)
-
-#define USART1_PORT (AVR32_USART1_RXD_PIN / 32)
-
-#define RX_PIN  (1 << (AVR32_USART1_RXD_PIN % 32))
-#define TX_PIN (1 << (AVR32_USART1_TXD_PIN % 32))
-
-#define PBA_HZ 60000000
-
-
-void init_usart(){
-    AVR32_GPIO.port[USART1_PORT].pmr2c = (RX_PIN | TX_PIN);
-    AVR32_GPIO.port[USART1_PORT].pmr1c = (RX_PIN | TX_PIN);
-    AVR32_GPIO.port[USART1_PORT].pmr0c = (RX_PIN | TX_PIN);
-    AVR32_GPIO.port[USART1_PORT].gperc = (RX_PIN | TX_PIN);
-
-    usart_options_t opts;
-    opts.baudrate = 38400;
-    opts.charlength = 8;
-    opts.paritytype = USART_NO_PARITY;
-    opts.stopbits = USART_1_STOPBIT;
-    opts.channelmode = USART_NORMAL_CHMODE;
-
-    usart_init_rs232(USART, &opts, PBA_HZ); 
-}
+#define STR_BUF_SIZE 256
+char strBuf[STR_BUF_SIZE];
 
 void console_init(){
     init_usart();
     console_print_str("Hello\r\n");
+}
+
+void console_printf(char* format, ...){
+    va_list args;
+
+    va_start(args, format);
+    vsnprintf(strBuf, STR_BUF_SIZE, format, args);
+    va_end(args);
+
+    console_print_str(strBuf);
 }
 
 void console_print(char c){

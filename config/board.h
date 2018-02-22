@@ -38,7 +38,16 @@
 
 #define TWI_SPEED 100000 // 100kHz
 
+/** USART **/
+#define USART ((avr32_usart_t*)AVR32_USART1_ADDRESS)
+
+#define USART1_PORT (AVR32_USART1_RXD_PIN / 32)
+
+#define RX_PIN  (1 << (AVR32_USART1_RXD_PIN % 32))
+#define TX_PIN (1 << (AVR32_USART1_TXD_PIN % 32))
+
 void init_twi();
 void init_spi();
+void init_usart();
 
 #endif

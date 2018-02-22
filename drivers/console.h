@@ -5,6 +5,8 @@ void console_init();
 
 void console_print(char c);
 
+void console_printf(char* format, ...);
+
 void console_print_str(char* str);
 
 #endif  // _USART_H_
