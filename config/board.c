@@ -31,8 +31,8 @@ void init_spi(){
     };
 
     /** 60 is BAUD_DIV -> 60 MHz Clock -> 1 MHz SPI CLK **/
-    spi_master_init((avr32_spi_t*)AVR32_SPI0_ADDRESS);
-    spi_master_setup_device((avr32_spi_t*)AVR32_SPI0_ADDRESS, &spi_device_conf, SPI_MODE_0, 30, 0);
+    spi_master_init(SPI);
+    spi_master_setup_device(SPI, &spi_device_conf, SPI_MODE_0, 30, 0);
     AVR32_SPI0.cr  |= AVR32_SPI_CR_SPIEN_MASK;
 }
 
@@ -50,4 +50,11 @@ void init_usart(){
     opts.channelmode = USART_NORMAL_CHMODE;
 
     usart_init_rs232(USART, &opts, PBA_HZ);
+}
+
+/** Initialize Shutdown Pins for VL53L0X **/
+void init_vl53l0x_sd(){
+    AVR32_GPIO.port[VL53L0X_PORT].gpers = (VL53L0X_SD_R | VL53L0X_SD_L | VL53L0X_SD_F | VL53L0X_SD_B);
+    AVR32_GPIO.port[VL53L0X_PORT].oders = (VL53L0X_SD_R | VL53L0X_SD_L | VL53L0X_SD_F | VL53L0X_SD_B);
+    AVR32_GPIO.port[VL53L0X_PORT].ovrs = (VL53L0X_SD_R | VL53L0X_SD_L | VL53L0X_SD_F | VL53L0X_SD_B);
 }

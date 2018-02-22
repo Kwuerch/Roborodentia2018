@@ -1,6 +1,10 @@
-#include "vl53l0x.h"
+#include <avr32/io.h>
+#include "board.h"
 #include "console.h"
 #include "delay.h"
+#include "vl53l0x.h"
+
+VL53L0X_Error vl53l0x_set_address(VL53L0X_DEV dev, uint8_t addr);
 
 VL53L0X_Error vl53l0x_init(VL53L0X_DEV dev){
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
@@ -10,8 +14,14 @@ VL53L0X_Error vl53l0x_init(VL53L0X_DEV dev){
     uint8_t vhvSettings;
     uint8_t phaseCal;
 
-	if (Status == VL53L0X_ERROR_NONE){
-        Status = VL53L0X_DataInit(dev);
+    if(dev -> I2cDevAddr != VL53L0X_DEFAULT_ADDR){
+        uint8_t addr = dev -> I2cDevAddr;
+        dev -> I2cDevAddr = VL53L0X_DEFAULT_ADDR;
+        Status = vl53l0x_set_address(dev, addr); 
+    }else{
+        if (Status == VL53L0X_ERROR_NONE){
+            Status = VL53L0X_DataInit(dev);
+        }
     }
 
 	if (Status == VL53L0X_ERROR_NONE){
@@ -181,4 +191,54 @@ void vl53l0x_print_error(VL53L0X_Error status){
             console_print_str("Error Not Caught\r\n");
             break;
     }
+}
+
+void vl53l0x_init_dev(VL53L0X_SENSOR id){
+    VL53L0X_Error status = VL53L0X_ERROR_NONE;
+    uint8_t addr;
+    uint8_t pin;
+
+    switch(id){
+        case VL53L0X_F:
+            addr = VL53L0X_I2C_F;
+            pin = VL53L0X_SD_F;
+            break;
+        case VL53L0X_B:
+            addr = VL53L0X_I2C_B;
+            pin = VL53L0X_SD_B;
+            break;
+        case VL53L0X_R:
+            addr = VL53L0X_I2C_R;
+            pin = VL53L0X_SD_R;
+            break;
+        case VL53L0X_L:
+            addr = VL53L0X_I2C_L;
+            pin = VL53L0X_SD_L;
+            break;
+        default:
+            addr = VL53L0X_DEFAULT_ADDR;
+            return;
+    }
+
+    VL53L0X_Dev_t dev;
+    //dev.I2cDevAddr = addr;
+    dev.I2cDevAddr = 0x29;
+    
+    AVR32_GPIO.port[VL53L0X_PORT].ovrc = pin;
+    console_printf("Pin is %i\r\n", pin);
+    status = vl53l0x_init(&dev);
+
+    if(status != VL53L0X_ERROR_NONE){
+        vl53l0x_print_error(status);
+    }
+}
+
+void vl53l0x_init_all(){
+    /** Initialize Pins & Shutdown **/
+    init_vl53l0x_sd();
+
+    //vl53l0x_init_dev(VL53L0X_F);
+    //vl53l0x_init_dev(VL53L0X_B);
+    vl53l0x_init_dev(VL53L0X_R);
+    //vl53l0x_init_dev(VL53L0X_L);
 }
