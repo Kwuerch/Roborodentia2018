@@ -27,13 +27,17 @@ SOURCES += $(PERIPHERALS)/flash.c \
 			$(PERIPHERALS)/scif.c \
 			$(PERIPHERALS)/twi.c \
 			$(PERIPHERALS)/usart.c \
-			$(PERIPHERALS)/spi_master.c
+			$(PERIPHERALS)/spi_master.c \
+			$(PERIPHERALS)/tc.c \
+			$(PERIPHERALS)/pwm.c
+
 
 SOURCES += $(CONFIG)/board.c
 
 SOURCES += $(DRIVERS)/console.c \
 			$(DRIVERS)/drv8711.c \
-			$(DRIVERS)/delay.c
+			$(DRIVERS)/delay.c \
+			$(DRIVERS)/motors.c
 
 SOURCES += $(VL53L0X)/core/src/vl53l0x_api.c \
 			$(VL53L0X)/core/src/vl53l0x_api_calibration.c \

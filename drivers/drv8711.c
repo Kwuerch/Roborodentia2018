@@ -231,6 +231,9 @@ uint16_t drv8711_read_status(uint8_t csid){
     return drv8711_read_reg(csid, DRV8711_STATUS_ADDRESS);
 }
 
+void drv8711_drive(DRV8711_ID id, uint8_t speed){
+
+}
 
 void drv8711_init(uint8_t csid){
     drv8711_write_ctrl(csid, ENBL_DISABLE, RDIR_DIR_PIN, RSTEP_NO_ACT, STEP_1_16, INTERNAL_DETECT, GAIN_20, DTIME_850_NS);

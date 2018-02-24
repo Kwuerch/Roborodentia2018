@@ -4,22 +4,52 @@
 #include "usart.h"
 #include "twi.h"
 
+void init_gpio_af(uint8_t port, uint32_t pin_mask, uint8_t func){
+    switch(func){
+        case 0x00: /** Function A **/
+            AVR32_GPIO.port[port].pmr2c = pin_mask;
+            AVR32_GPIO.port[port].pmr1c = pin_mask;
+            AVR32_GPIO.port[port].pmr0c = pin_mask;
+            break;
+        case 0x01: /** Function B **/
+            AVR32_GPIO.port[port].pmr2c = pin_mask;
+            AVR32_GPIO.port[port].pmr1c = pin_mask;
+            AVR32_GPIO.port[port].pmr0s = pin_mask;
+            break;
+        case 0x02: /** Function C **/
+            AVR32_GPIO.port[port].pmr2c = pin_mask;
+            AVR32_GPIO.port[port].pmr1s = pin_mask;
+            AVR32_GPIO.port[port].pmr0c = pin_mask;
+            break;
+        case 0x03: /** Function D **/
+            AVR32_GPIO.port[port].pmr2c = pin_mask;
+            AVR32_GPIO.port[port].pmr1s = pin_mask;
+            AVR32_GPIO.port[port].pmr0s = pin_mask;
+            break;
+        case 0x04: /** Function E **/
+            AVR32_GPIO.port[port].pmr2s = pin_mask;
+            AVR32_GPIO.port[port].pmr1c = pin_mask;
+            AVR32_GPIO.port[port].pmr0c = pin_mask;
+            break;
+        case 0x05: /** Function F **/
+            AVR32_GPIO.port[port].pmr2s = pin_mask;
+            AVR32_GPIO.port[port].pmr1c = pin_mask;
+            AVR32_GPIO.port[port].pmr0s = pin_mask;
+            break;
+    }
+    
+    AVR32_GPIO.port[port].gperc = pin_mask;
+}
+
 void init_twi(){
-    //Function A
-    AVR32_GPIO.port[TWI0_PORT].pmr2c = (TWID_PIN | TWICK_PIN);
-    AVR32_GPIO.port[TWI0_PORT].pmr1c = (TWID_PIN | TWICK_PIN);
-    AVR32_GPIO.port[TWI0_PORT].pmr0c = (TWID_PIN | TWICK_PIN);
-    AVR32_GPIO.port[TWI0_PORT].gperc = (TWID_PIN | TWICK_PIN);
+    init_gpio_af(TWI0_PORT, (TWID_PIN | TWICK_PIN), TWI_FUNC);
 
     twi_enable((avr32_twim_t*)AVR32_TWIM0_ADDRESS, TWI_SPEED, PBA_HZ);
 }
 
 void init_spi(){
     /** Initialize SPI pins - Function A**/
-    AVR32_GPIO.port[SPI0_PORT].pmr2c = (SPI0_MISO_PIN | SPI0_MOSI_PIN | SPI0_SCK_PIN );
-    AVR32_GPIO.port[SPI0_PORT].pmr1c = (SPI0_MISO_PIN | SPI0_MOSI_PIN | SPI0_SCK_PIN );
-    AVR32_GPIO.port[SPI0_PORT].pmr0c = (SPI0_MISO_PIN | SPI0_MOSI_PIN | SPI0_SCK_PIN );
-    AVR32_GPIO.port[SPI0_PORT].gperc = (SPI0_MISO_PIN | SPI0_MOSI_PIN | SPI0_SCK_PIN );
+    init_gpio_af(SPI0_PORT, (SPI0_MISO_PIN | SPI0_MOSI_PIN | SPI0_SCK_PIN ), SPI_FUNC);
 
     /** Initialize CS Pins **/
     AVR32_GPIO.port[SPI_CS_PORT].gpers = (SPI_CS0_PIN | SPI_CS1_PIN | SPI_CS2_PIN | SPI_CS3_PIN);
@@ -37,10 +67,7 @@ void init_spi(){
 }
 
 void init_usart(){
-    AVR32_GPIO.port[USART1_PORT].pmr2c = (RX_PIN | TX_PIN);
-    AVR32_GPIO.port[USART1_PORT].pmr1c = (RX_PIN | TX_PIN);
-    AVR32_GPIO.port[USART1_PORT].pmr0c = (RX_PIN | TX_PIN);
-    AVR32_GPIO.port[USART1_PORT].gperc = (RX_PIN | TX_PIN);
+    init_gpio_af(USART1_PORT, (RX_PIN | TX_PIN), USART1_FUNC); 
 
     usart_options_t opts;
     opts.baudrate = 38400;
@@ -56,5 +83,29 @@ void init_usart(){
 void init_vl53l0x_sd(){
     AVR32_GPIO.port[VL53L0X_PORT].gpers = (VL53L0X_SD_PIN_R | VL53L0X_SD_PIN_L | VL53L0X_SD_PIN_F | VL53L0X_SD_PIN_B);
     AVR32_GPIO.port[VL53L0X_PORT].oders = (VL53L0X_SD_PIN_R | VL53L0X_SD_PIN_L | VL53L0X_SD_PIN_F | VL53L0X_SD_PIN_B);
-    AVR32_GPIO.port[VL53L0X_PORT].ovrs = (VL53L0X_SD_PIN_R | VL53L0X_SD_PIN_L | VL53L0X_SD_PIN_F | VL53L0X_SD_PIN_B);
+    AVR32_GPIO.port[VL53L0X_PORT].ovrc = (VL53L0X_SD_PIN_R | VL53L0X_SD_PIN_L | VL53L0X_SD_PIN_F | VL53L0X_SD_PIN_B);
+}
+
+void init_drv8711_step(){
+    init_gpio_af(DRV8711_STEPAB_PORT, (DRV8711_STEP_PIN_A | DRV8711_STEP_PIN_B), DRV8711_STEPAB_FUNC);
+    init_gpio_af(DRV8711_STEPC_PORT, DRV8711_STEP_PIN_C, DRV8711_STEPC_FUNC);
+    init_gpio_af(DRV8711_STEPD_PORT, DRV8711_STEP_PIN_D, DRV8711_STEPD_FUNC);
+}
+
+void init_drv8711_ctrl(){
+    AVR32_GPIO.port[DRV8711_CTRL_PORT].gpers = (DRV8711_NSLP_PIN | DRV8711_RST_PIN);
+    AVR32_GPIO.port[DRV8711_CTRL_PORT].oders = (DRV8711_NSLP_PIN | DRV8711_RST_PIN);
+
+    AVR32_GPIO.port[DRV8711_CTRL_PORT].ovrc =  DRV8711_RST_PIN;
+    AVR32_GPIO.port[DRV8711_CTRL_PORT].ovrs =  DRV8711_NSLP_PIN;
+}
+
+void init_drv8711_dir(){
+    AVR32_GPIO.port[DRV8711_DIR_PORT].gpers = (DRV8711_DIR_PIN_A | DRV8711_DIR_PIN_B | DRV8711_DIR_PIN_C | DRV8711_DIR_PIN_D);
+    AVR32_GPIO.port[DRV8711_DIR_PORT].oders = (DRV8711_DIR_PIN_A | DRV8711_DIR_PIN_B | DRV8711_DIR_PIN_C | DRV8711_DIR_PIN_D);
+    AVR32_GPIO.port[DRV8711_DIR_PORT].ovrc =  (DRV8711_DIR_PIN_A | DRV8711_DIR_PIN_B | DRV8711_DIR_PIN_C | DRV8711_DIR_PIN_D);
+}
+
+void init_pwm_step(){
+    init_gpio_af(PWM_PORT, (PWM_SHOOT_PIN | PWM_G1_PIN | PWM_G2_PIN | PWM_G3_PIN), PWM_FUNC);
 }

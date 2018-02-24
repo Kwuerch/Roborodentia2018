@@ -33,7 +33,7 @@ TWI_STATUS twi_run(volatile avr32_twim_t* twim, TWI_MODE mode, uint8_t* data, in
     // Enable master transfer
     twim->cr = AVR32_TWIM_CR_MEN_MASK;
 
-    while(--timeout){
+    while(timeout--){
         //console_printf("Timeout: %i\r\n", timeout);
         if(twim->sr & (AVR32_TWIM_SR_NAK_MASK | AVR32_TWIM_SR_TXRDY_MASK | AVR32_TWIM_SR_RXRDY_MASK | AVR32_TWIM_SR_CCOMP_MASK)){
             uint32_t status = twim->sr;

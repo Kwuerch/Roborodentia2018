@@ -225,7 +225,7 @@ void vl53l0x_init_dev(VL53L0X_ID id){
     }
 
     
-    AVR32_GPIO.port[VL53L0X_PORT].ovrc = dev -> pin; 
+    AVR32_GPIO.port[VL53L0X_PORT].ovrs = dev -> pin; 
     status = vl53l0x_init(dev);
 
     if(status != VL53L0X_ERROR_NONE){

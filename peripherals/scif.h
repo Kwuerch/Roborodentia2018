@@ -5,5 +5,6 @@
 
 void scif_enable_RCCR8();
 void scif_enable_RC120MCR();
+void scif_enable_OSC32K();
 
 #endif
