@@ -43,6 +43,11 @@ TWI_STATUS twi_run(volatile avr32_twim_t* twim, TWI_MODE mode, uint8_t* data, in
             delay_100_us();
             delay_100_us();
             delay_100_us();
+            delay_100_us();
+            delay_100_us();
+            /**
+            delay_100_us();
+            **/
 
             if(rbts < nbytes){
                 ts = TWI_TIMEOUT;

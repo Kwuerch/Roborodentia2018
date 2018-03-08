@@ -64,6 +64,9 @@ void init_spi(){
     spi_master_init(SPI);
     spi_master_setup_device(SPI, &spi_device_conf, SPI_MODE_0, 30, 0);
     AVR32_SPI0.cr  |= AVR32_SPI_CR_SPIEN_MASK;
+
+    SPI->mr &= ~AVR32_SPI_MR_PCS_MASK;
+    SPI->mr |= AVR32_SPI_MR_PCS_MASK & (1 << AVR32_SPI_MR_PCS_OFFSET);
 }
 
 void init_usart(){
@@ -84,6 +87,10 @@ void init_vl53l0x_sd(){
     AVR32_GPIO.port[VL53L0X_PORT].gpers = (VL53L0X_SD_PIN_R | VL53L0X_SD_PIN_L | VL53L0X_SD_PIN_F | VL53L0X_SD_PIN_B);
     AVR32_GPIO.port[VL53L0X_PORT].oders = (VL53L0X_SD_PIN_R | VL53L0X_SD_PIN_L | VL53L0X_SD_PIN_F | VL53L0X_SD_PIN_B);
     AVR32_GPIO.port[VL53L0X_PORT].ovrc = (VL53L0X_SD_PIN_R | VL53L0X_SD_PIN_L | VL53L0X_SD_PIN_F | VL53L0X_SD_PIN_B);
+
+    AVR32_GPIO.port[VL53L0X_AVDD_PORT].gpers = (VL53L0X_AVDD_PIN);
+    AVR32_GPIO.port[VL53L0X_AVDD_PORT].oders = (VL53L0X_AVDD_PIN);
+    AVR32_GPIO.port[VL53L0X_AVDD_PORT].ovrc = (VL53L0X_AVDD_PIN);
 }
 
 void init_drv8711_step(){
@@ -99,6 +106,7 @@ void init_drv8711_ctrl(){
     AVR32_GPIO.port[DRV8711_CTRL_PORT].ovrc =  DRV8711_RST_PIN;
     AVR32_GPIO.port[DRV8711_CTRL_PORT].ovrs =  DRV8711_NSLP_PIN;
 }
+
 
 void init_drv8711_dir(){
     AVR32_GPIO.port[DRV8711_DIR_PORT].gpers = (DRV8711_DIR_PIN_A | DRV8711_DIR_PIN_B | DRV8711_DIR_PIN_C | DRV8711_DIR_PIN_D);

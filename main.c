@@ -24,7 +24,11 @@ int main(void){
     AVR32_GPIO.port[1].ovr = 0x00;
 
     scif_enable_RC120MCR();
+
+    /** This clock is not used **/
+    /** This function does not even work :( **/
     scif_enable_OSC32K();
+
     flash_set_wait_state(1);
 
     pm_divide_clk(CPU_CLK, CLK_DIV_2);
@@ -38,23 +42,23 @@ int main(void){
     init_spi();
 
     console_init();
-    //vl53l0x_init_all();
+    vl53l0x_init_all();
+
+    console_printf("Hello Again\r\n");
+
+    init_drv8711_step();
+    init_drv8711_ctrl();
+    init_drv8711_dir();
 
     drv8711_init(DRV8711_FL);
     drv8711_init(DRV8711_BR);
     drv8711_init(DRV8711_FR);
     drv8711_init(DRV8711_BL);
 
-    init_drv8711_step();
-    init_drv8711_ctrl();
-    init_drv8711_dir();
     init_pwm_step();
-
     tc_init();
     pwm_init();
     
-    int count = 0;
-
     //180 corresponds to 2.1kHz
     //1 corresponds to 690 Hz
     drive_motor(DRV8711_FL, 0, 1);

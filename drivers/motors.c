@@ -86,3 +86,36 @@ void drive_motor(DRV8711_ID id, uint8_t dir, uint8_t speed){
 void drive_motor_ramp(DRV8711_ID id, uint8_t speed){
 
 }
+
+
+/**
+void drive_to(uint16_t x, uint16_t y, uint16_t tol){
+    int xInRange = 0;
+    int yInRange = 0;
+    int curX, curY;
+    int difX, difY;
+
+    while(!(xInRange && yInRange)){
+        curX = getCurX();
+        curY = getCurY();
+
+        if(curX < (x + tol) && curX > (x - tol)){
+            moveX(0, 0);
+            xInRange = 1;
+
+        }else{
+            difX = x - curX;
+            moveX(scale[difx],  (diff > 0));
+        }
+
+        if(curY < (x + tol) && curY > (x - tol)){
+            moveY(0, 0);
+            yInRange = 1;
+
+        }else{
+            difY = y - curY;
+            moveY(scale[difx],  (diff > 0));
+        }
+    }
+}
+**/

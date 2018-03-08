@@ -224,8 +224,8 @@ void vl53l0x_init_dev(VL53L0X_ID id){
             return;
     }
 
-    
     AVR32_GPIO.port[VL53L0X_PORT].ovrs = dev -> pin; 
+    console_printf("Pin %u is set high\r\n", dev -> pin);
     status = vl53l0x_init(dev);
 
     if(status != VL53L0X_ERROR_NONE){
@@ -236,13 +236,25 @@ void vl53l0x_init_dev(VL53L0X_ID id){
 void vl53l0x_init_all(){
     /** Initialize Pins & Shutdown **/
     init_vl53l0x_sd();
+    AVR32_GPIO.port[VL53L0X_AVDD_PORT].ovrs = (VL53L0X_AVDD_PIN);
 
-    /** TODO - FIX THIS WHEN ALL SENSORS ARE READY **/
-    //vl53l0x_init_dev(VL53L0X_F);
-    //vl53l0x_init_dev(VL53L0X_B);
+    delay_ms(10);
+    vl53l0x_init_dev(VL53L0X_F);
+    vl53l0x_init_dev(VL53L0X_B);
     vl53l0x_init_dev(VL53L0X_R);
-    //vl53l0x_init_dev(VL53L0X_L);
+    vl53l0x_init_dev(VL53L0X_L);
 }
+
+/**
+static uint16_t bufL[3];
+static uint16_t bufR[3];
+static uint16_t yBufF[3];
+static uint16_t yBufB[3];
+static uint8_t bufLIdx = 0;
+static uint8_t bufRIdx = 0;
+static uint8_t yBufFIdx = 0;
+static uint8_t yBufBIdx = 0;
+**/
 
 /** Returns 0 for invalid measurement **/
 uint16_t vl53l0x_measure(VL53L0X_ID id){
@@ -283,3 +295,66 @@ uint16_t vl53l0x_measure(VL53L0X_ID id){
 
     return meas.RangeMilliMeter;
 }
+
+uint16_t medOfThree(uint16_t arr[]){
+    uint16_t medIdx;
+    uint16_t minIdx;
+
+    if(arr[0] < arr[1]){
+        medIdx = 1;
+        minIdx = 0;
+    }else{
+        medIdx = 0;
+        minIdx = 1;
+    }
+
+    if(arr[2] < medIdx){
+        medIdx = 2;
+    }
+
+    return arr[medIdx] > arr[minIdx] ? arr[medIdx] : arr[minIdx];
+}
+
+/**
+uint16_t getX(){
+    VL53L0X_Error status = VL53L0X_ERROR_NONE;
+    VL53L0X_RangingMeasurementData_t meas;
+
+    status = VL53L0X_PerformSingleRangeMeasurement(&dev_l, &meas);
+    bufL[bufLIdx] = meas.RangeMilliMeter;
+    bufLIdx = (bufLIdx + 1) % 3;
+
+    if(status != VL53L0X_ERROR_NONE){
+        vl53l0x_print_error(status);
+    }
+    
+
+    status = VL53L0X_PerformSingleRangeMeasurement(&dev_r, &meas);
+    bufR[bufRIdx] = meas.RangeMilliMeter;
+    bufRIdx = (bufRIdx + 1) % 3;
+
+    if(status != VL53L0X_ERROR_NONE){
+        vl53l0x_print_error(status);
+    }
+
+    uint16_t lVal = medOfThree(bufL);
+    uint16_t rVal = medOfThree(bufR);
+
+    /** Values are Valid **/
+/**
+    if(lVal && rVal){
+        return ((lVal + HALF_X_SIZE) + (FIELD_X_SIZE - HALF_X_SIZE - rVal)) >> 2;
+    }
+
+    /** TODO - THIS MIGHT CAUSE ISSUES when hitting the ramp **/
+    /** Assuming both will work or only one will work TODO - could be an issue **/
+/**
+    if(!lVal){
+        return FIELD_X_SIZE - HALF_X_SIZE - rVal;
+    }
+
+    if(!rVal){
+        return lVal + HALF_X_SIZE;
+    }
+}
+**/

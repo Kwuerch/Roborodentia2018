@@ -35,19 +35,19 @@ uint16_t drv8711_read_reg(uint8_t csid, uint8_t reg){
     switch(csid){
         case 0:
             csrReg = &(spi->csr0);
-            pin = SPI0_NPCS_0_PIN;
+            pin = SPI_CS0_PIN;
             break;
         case 1:
             csrReg = &(spi->csr1);
-            pin = SPI0_NPCS_1_PIN;
+            pin = SPI_CS1_PIN;
             break;
         case 2:
             csrReg = &(spi->csr2);
-            pin = SPI0_NPCS_2_PIN;
+            pin = SPI_CS2_PIN;
             break;
         case 3:
             csrReg = &(spi->csr3);
-            pin = SPI0_NPCS_3_PIN;
+            pin = SPI_CS3_PIN;
             break;
         default:
             console_print_str("bad CSID\r\n");
@@ -61,13 +61,13 @@ uint16_t drv8711_read_reg(uint8_t csid, uint8_t reg){
     uint16_t data = spi->rdr & AVR32_SPI_RDR_RD_MASK;
 
 
-    AVR32_GPIO.port[SPI0_PORT].ovrs = pin;
+    AVR32_GPIO.port[SPI_CS_PORT].ovrs = pin;
 
     unsigned int timeout;
     timeout = SPI_TIMEOUT;
     while (!spi_is_tx_ready(spi)) {
         if (!timeout--) {
-            AVR32_GPIO.port[SPI0_PORT].ovrc = pin;
+            AVR32_GPIO.port[SPI_CS_PORT].ovrc = pin;
             return 0;
         }
     }
@@ -77,14 +77,14 @@ uint16_t drv8711_read_reg(uint8_t csid, uint8_t reg){
     while (!(spi->sr & AVR32_SPI_SR_TXEMPTY_MASK)) {
         if (!timeout--) {
             console_print_str("TIMEOUT\r\n");
-            AVR32_GPIO.port[SPI0_PORT].ovrc = pin;
+            AVR32_GPIO.port[SPI_CS_PORT].ovrc = pin;
             return 0;
         }
     }
     
     data = spi->rdr & AVR32_SPI_RDR_RD_MASK;
 
-    AVR32_GPIO.port[SPI0_PORT].ovrc = (pin);
+    AVR32_GPIO.port[SPI_CS_PORT].ovrc = (pin);
 
     return data;
 }
@@ -94,26 +94,26 @@ void drv8711_write_reg(uint8_t csid, uint8_t reg, uint16_t data){
     avr32_spi_t* spi = (avr32_spi_t*)AVR32_SPI0_ADDRESS;
 
     spi->mr &= ~AVR32_SPI_MR_PCS_MASK;
-    spi->mr |= AVR32_SPI_MR_PCS_MASK & (csid << AVR32_SPI_MR_PCS_OFFSET);
+    spi->mr |= AVR32_SPI_MR_PCS_MASK & (0 << AVR32_SPI_MR_PCS_OFFSET);
 
     volatile unsigned long* csrReg;
     uint32_t pin;
     switch(csid){
         case 0:
             csrReg = &(spi->csr0);
-            pin = SPI0_NPCS_0_PIN;
+            pin = SPI_CS0_PIN;
             break;
         case 1:
             csrReg = &(spi->csr1);
-            pin = SPI0_NPCS_1_PIN;
+            pin = SPI_CS1_PIN;
             break;
         case 2:
             csrReg = &(spi->csr2);
-            pin = SPI0_NPCS_2_PIN;
+            pin = SPI_CS2_PIN;
             break;
         case 3:
             csrReg = &(spi->csr3);
-            pin = SPI0_NPCS_3_PIN;
+            pin = SPI_CS3_PIN;
             break;
         default:
             console_print_str("bad CSID\r\n");
@@ -124,14 +124,15 @@ void drv8711_write_reg(uint8_t csid, uint8_t reg, uint16_t data){
     *csrReg &= ~AVR32_SPI_CSR0_BITS_MASK; 
     *csrReg |= AVR32_SPI_CSR0_BITS_MASK & (AVR32_SPI_CSR0_BITS_16_BPT << AVR32_SPI_CSR0_BITS_OFFSET);
 
-    AVR32_GPIO.port[SPI0_PORT].ovrs = (SPI0_NPCS_0_PIN);
+    AVR32_GPIO.port[SPI_CS_PORT].ovrs = pin;
 
     unsigned int timeout;
     timeout = SPI_TIMEOUT;
+
     while (!spi_is_tx_ready(spi)) {
         if (!timeout--) {
-            console_print_str("TIMEOUT\r\n");
-            AVR32_GPIO.port[SPI0_PORT].ovrc = pin;
+            console_print_str("TIMEOUT_READY\r\n");
+            AVR32_GPIO.port[SPI_CS_PORT].ovrc = pin;
             return;
         }
     }
@@ -140,15 +141,13 @@ void drv8711_write_reg(uint8_t csid, uint8_t reg, uint16_t data){
 
     while (!(spi->sr & AVR32_SPI_SR_TXEMPTY_MASK)) {
         if (!timeout--) {
-            console_print_str("TIMEOUT\r\n");
-            AVR32_GPIO.port[SPI0_PORT].ovrc = pin;
+            console_print_str("TIMEOUT_EMPTY\r\n");
+            AVR32_GPIO.port[SPI_CS_PORT].ovrc = pin;
             return;
         }
     }
 
-    AVR32_GPIO.port[SPI0_PORT].ovrc = pin;
-
-    console_print_str("DATA sent\r\n");
+    AVR32_GPIO.port[SPI_CS_PORT].ovrc = pin;
     
 }
 
@@ -231,17 +230,13 @@ uint16_t drv8711_read_status(uint8_t csid){
     return drv8711_read_reg(csid, DRV8711_STATUS_ADDRESS);
 }
 
-void drv8711_drive(DRV8711_ID id, uint8_t speed){
-
-}
-
 void drv8711_init(uint8_t csid){
-    drv8711_write_ctrl(csid, ENBL_DISABLE, RDIR_DIR_PIN, RSTEP_NO_ACT, STEP_1_16, INTERNAL_DETECT, GAIN_20, DTIME_850_NS);
-    drv8711_write_torque(csid, 0xAA, SMPLTH_100_US);
+    drv8711_write_ctrl(csid, ENBL_ENABLE, RDIR_DIR_PIN, RSTEP_NO_ACT, STEP_1_16, INTERNAL_DETECT, GAIN_20, DTIME_850_NS);
+    drv8711_write_torque(csid, 0xAA, SMPLTH_50_US);
     drv8711_write_off(csid, 0x30, PWMMODE_INT_INDEXER); 
-    drv8711_write_blank(csid, 0x80, ABT_DISABLE ); 
-    drv8711_write_decay(csid, 0x10, DECMOD_1); 
-    drv8711_write_stall(csid, 0x40, SDCNT_FIRST_STEP, VDIV_DIV_32);
-    drv8711_write_drive(csid, OCPTH_500_MV, OCPDEG_4_US, TDRIVEN_500_NS, TDRIVEP_500_NS, IDRIVEN_300_MA, IDRIVEP_150_MA);
+    drv8711_write_blank(csid, 0x80, ABT_ENABLE ); 
+    drv8711_write_decay(csid, 0x10, DECMOD_3); 
+    drv8711_write_stall(csid, 0x40, SDCNT_EIGTH_STEP, VDIV_DIV_4);
+    drv8711_write_drive(csid, OCPTH_500_MV, OCPDEG_2_US, TDRIVEN_500_NS, TDRIVEP_500_NS, IDRIVEN_100_MA, IDRIVEP_50_MA);
     drv8711_write_status(csid, 0x00);
 }

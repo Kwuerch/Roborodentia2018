@@ -117,6 +117,9 @@ typedef enum VL53L0X_ID{
 #define VL53L0X_SD_PIN_L ((uint32_t)(1 << 11))
 #define VL53L0X_SD_PIN_R ((uint32_t)(1 << 12))
 
+#define VL53L0X_AVDD_PORT 1
+#define VL53L0X_AVDD_PIN ((uint32_t)(1 << 31))
+
 /** Function Prototypes **/
 void init_twi();
 void init_spi();
