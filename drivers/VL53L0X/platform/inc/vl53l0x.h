@@ -25,4 +25,7 @@ void vl53l0x_init_all();
 
 uint16_t vl53l0x_measure(VL53L0X_ID id);
 
+uint16_t getXPosition();
+uint16_t getYPosition();
+
 #endif

@@ -6,6 +6,13 @@
 #define PBB_HZ 60000000
 #define PBC_HZ 60000000
 
+/** Field / Board (mm)**/
+#define BOARD_HALF_X_SIZE 146
+#define FIELD_X_SIZE 1220
+#define BOARD_HALF_Y_SIZE 171
+#define FIELD_Y_SIZE 2438
+#define MAX_RANGE 1300
+
 /** TC0 **/
 #define TC0_A_PORT (AVR32_TC0_A0_0_0_PIN / 32)
 #define TC0_A_PIN  (1 << (AVR32_TC0_A0_0_0_PIN % 32))

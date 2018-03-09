@@ -245,16 +245,14 @@ void vl53l0x_init_all(){
     vl53l0x_init_dev(VL53L0X_L);
 }
 
-/**
 static uint16_t bufL[3];
 static uint16_t bufR[3];
-static uint16_t yBufF[3];
-static uint16_t yBufB[3];
+static uint16_t bufF[3];
+static uint16_t bufB[3];
 static uint8_t bufLIdx = 0;
 static uint8_t bufRIdx = 0;
-static uint8_t yBufFIdx = 0;
-static uint8_t yBufBIdx = 0;
-**/
+static uint8_t bufFIdx = 0;
+static uint8_t bufBIdx = 0;
 
 /** Returns 0 for invalid measurement **/
 uint16_t vl53l0x_measure(VL53L0X_ID id){
@@ -296,7 +294,7 @@ uint16_t vl53l0x_measure(VL53L0X_ID id){
     return meas.RangeMilliMeter;
 }
 
-uint16_t medOfThree(uint16_t arr[]){
+int16_t medOfThree(uint16_t arr[]){
     uint16_t medIdx;
     uint16_t minIdx;
 
@@ -315,23 +313,27 @@ uint16_t medOfThree(uint16_t arr[]){
     return arr[medIdx] > arr[minIdx] ? arr[medIdx] : arr[minIdx];
 }
 
-/**
-uint16_t getX(){
+uint16_t getXPosition(){
     VL53L0X_Error status = VL53L0X_ERROR_NONE;
     VL53L0X_RangingMeasurementData_t meas;
 
-    status = VL53L0X_PerformSingleRangeMeasurement(&dev_l, &meas);
-    bufL[bufLIdx] = meas.RangeMilliMeter;
-    bufLIdx = (bufLIdx + 1) % 3;
+    /** Measure Left Side **/
+    status = VL53L0X_PerformSingleRangingMeasurement(&dev_l, &meas);
+    if(meas.RangeMilliMeter < MAX_RANGE){
+        bufL[bufLIdx] = meas.RangeMilliMeter;
+        bufLIdx = (bufLIdx + 1) % 3;
+    }
 
     if(status != VL53L0X_ERROR_NONE){
         vl53l0x_print_error(status);
     }
-    
 
-    status = VL53L0X_PerformSingleRangeMeasurement(&dev_r, &meas);
-    bufR[bufRIdx] = meas.RangeMilliMeter;
-    bufRIdx = (bufRIdx + 1) % 3;
+    /** Measure Right Side **/
+    status = VL53L0X_PerformSingleRangingMeasurement(&dev_r, &meas);
+    if(meas.RangeMilliMeter < MAX_RANGE){
+        bufR[bufRIdx] = meas.RangeMilliMeter;
+        bufRIdx = (bufRIdx + 1) % 3;
+    }
 
     if(status != VL53L0X_ERROR_NONE){
         vl53l0x_print_error(status);
@@ -340,21 +342,74 @@ uint16_t getX(){
     uint16_t lVal = medOfThree(bufL);
     uint16_t rVal = medOfThree(bufR);
 
+    console_printf("Lvalue %i, RValue %i", lVal, rVal);
+
     /** Values are Valid **/
-/**
     if(lVal && rVal){
-        return ((lVal + HALF_X_SIZE) + (FIELD_X_SIZE - HALF_X_SIZE - rVal)) >> 2;
+        return ((lVal + BOARD_HALF_X_SIZE) + (FIELD_X_SIZE - BOARD_HALF_X_SIZE - rVal)) >> 1;
     }
 
     /** TODO - THIS MIGHT CAUSE ISSUES when hitting the ramp **/
     /** Assuming both will work or only one will work TODO - could be an issue **/
-/**
     if(!lVal){
-        return FIELD_X_SIZE - HALF_X_SIZE - rVal;
+        return FIELD_X_SIZE - BOARD_HALF_X_SIZE - rVal;
     }
 
     if(!rVal){
-        return lVal + HALF_X_SIZE;
+        return lVal + BOARD_HALF_X_SIZE;
     }
+
+    /** TODO - This could totally mess up the dynamics of driving **/
+    return 0;
 }
-**/
+
+/** TODO - Ignore values that are greater than max_range. Is this OK???? **/
+uint16_t getYPosition(){
+    VL53L0X_Error status = VL53L0X_ERROR_NONE;
+    VL53L0X_RangingMeasurementData_t meas;
+
+    /** Measure Left Side **/
+    status = VL53L0X_PerformSingleRangingMeasurement(&dev_f, &meas);
+    if(meas.RangeMilliMeter < MAX_RANGE){
+        bufF[bufFIdx] = meas.RangeMilliMeter;
+        bufFIdx = (bufFIdx + 1) % 3;
+    }
+
+    if(status != VL53L0X_ERROR_NONE){
+        vl53l0x_print_error(status);
+    }
+
+    /** Measure Right Side **/
+    status = VL53L0X_PerformSingleRangingMeasurement(&dev_b, &meas);
+    if(meas.RangeMilliMeter < MAX_RANGE){
+        bufB[bufBIdx] = meas.RangeMilliMeter;
+        bufBIdx = (bufBIdx + 1) % 3;
+    }
+
+    if(status != VL53L0X_ERROR_NONE){
+        vl53l0x_print_error(status);
+    }
+
+    uint16_t fVal = medOfThree(bufF);
+    uint16_t bVal = medOfThree(bufB);
+
+    console_printf("Fvalue %i, BValue %i", fVal, bVal);
+
+    /** Values are Valid **/
+    if(fVal && bVal){
+        return ((bVal + BOARD_HALF_Y_SIZE) + (FIELD_Y_SIZE - BOARD_HALF_Y_SIZE - fVal)) >> 1;
+    }
+
+    /** TODO - THIS MIGHT CAUSE ISSUES when hitting the ramp **/
+    /** Assuming both will work or only one will work TODO - could be an issue **/
+    if(!bVal){
+        return FIELD_Y_SIZE - BOARD_HALF_Y_SIZE - fVal;
+    }
+
+    if(!fVal){
+        return bVal + BOARD_HALF_Y_SIZE;
+    }
+
+    /** TODO - This could totally mess up the dynamics of driving **/
+    return 0;
+}

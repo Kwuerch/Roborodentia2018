@@ -66,7 +66,14 @@ int main(void){
     drive_motor(DRV8711_BR, 0, 60);
     drive_motor(DRV8711_BL, 0, 70);
 
+    uint16_t xVal, yVal;
     while(1){
+        xVal = getXPosition();
+        console_printf("X Value: %u\r\n", xVal);
+
+        yVal = getYPosition();
+        console_printf("Y Value: %u\r\n", yVal);
+
         /**
         while(count++ < 2000){
             AVR32_TC0.channel[0].ra -= 1;
@@ -80,8 +87,5 @@ int main(void){
             delay_ms(1);
         }
         **/
-
-
-        delay_ms(100);
     }
 }
