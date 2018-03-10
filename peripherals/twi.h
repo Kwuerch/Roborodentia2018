@@ -4,7 +4,7 @@
 #include <avr32/io.h>
 #include <stdint.h>
 
-#define TWI_TIMEOUT_CONST 200
+#define TWI_TIMEOUT_CONST 100
 
 #define AVR32_TWIM_SCR_NAK_MASK (AVR32_TWIM_SCR_ANAK_MASK \
         | AVR32_TWIM_SCR_DNAK_MASK)

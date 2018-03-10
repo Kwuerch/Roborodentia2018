@@ -235,5 +235,7 @@ uint16_t drv8711_read_reg(uint8_t csid, uint8_t reg);
 void drv8711_write_reg(uint8_t csid, uint8_t reg, uint16_t data);
 void drv8711_init(uint8_t csid);
 uint16_t drv8711_read_status(uint8_t csid);
+void drv8711_print_registers(uint8_t csid);
+void drv8711_write_torque(uint8_t csid, uint8_t torque, DRV8711_SMPLTH smplt);
 
 #endif

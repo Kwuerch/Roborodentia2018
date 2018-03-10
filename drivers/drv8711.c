@@ -27,8 +27,7 @@ uint16_t drv8711_read_reg(uint8_t csid, uint8_t reg){
     avr32_spi_t* spi = (avr32_spi_t*)AVR32_SPI0_ADDRESS;
 
     spi->mr &= ~AVR32_SPI_MR_PCS_MASK;
-    spi->mr |= AVR32_SPI_MR_PCS_MASK & (csid << AVR32_SPI_MR_PCS_OFFSET);
-
+    spi->mr |= AVR32_SPI_MR_PCS_MASK & (0 << AVR32_SPI_MR_PCS_OFFSET);
 
     volatile unsigned long* csrReg;
     uint32_t pin;
@@ -68,21 +67,22 @@ uint16_t drv8711_read_reg(uint8_t csid, uint8_t reg){
     while (!spi_is_tx_ready(spi)) {
         if (!timeout--) {
             AVR32_GPIO.port[SPI_CS_PORT].ovrc = pin;
+            console_print_str("TIMEOUT1\r\n");
             return 0;
         }
     }
 
-    spi->tdr = ((0x8) | reg) << 12 << AVR32_SPI_TDR_TD_OFFSET;
+    spi->tdr = (reg << DRV8711_ADDR_OFFSET) | DRV8711_READ_MASK;
 
-    while (!(spi->sr & AVR32_SPI_SR_TXEMPTY_MASK)) {
+    while (!spi_is_rx_ready(spi)) {
         if (!timeout--) {
-            console_print_str("TIMEOUT\r\n");
+            console_print_str("TIMEOUT2\r\n");
             AVR32_GPIO.port[SPI_CS_PORT].ovrc = pin;
             return 0;
         }
     }
     
-    data = spi->rdr & AVR32_SPI_RDR_RD_MASK;
+    data = (spi->rdr) & AVR32_SPI_RDR_RD_MASK;
 
     AVR32_GPIO.port[SPI_CS_PORT].ovrc = (pin);
 
@@ -230,12 +230,23 @@ uint16_t drv8711_read_status(uint8_t csid){
     return drv8711_read_reg(csid, DRV8711_STATUS_ADDRESS);
 }
 
+void drv8711_print_registers(uint8_t csid){
+    console_printf("0x%4x\t", drv8711_read_reg(csid, DRV8711_CTRL_ADDRESS));
+    console_printf("0x%4x\t", drv8711_read_reg(csid, DRV8711_TORQUE_ADDRESS));
+    console_printf("0x%4x\t", drv8711_read_reg(csid, DRV8711_OFF_ADDRESS));
+    console_printf("0x%4x\t", drv8711_read_reg(csid, DRV8711_BLANK_ADDRESS));
+    console_printf("0x%4x\t", drv8711_read_reg(csid, DRV8711_DECAY_ADDRESS));
+    console_printf("0x%4x\t", drv8711_read_reg(csid, DRV8711_STALL_ADDRESS));
+    console_printf("0x%4x\t", drv8711_read_reg(csid, DRV8711_DRIVE_ADDRESS));
+    console_printf("0x%4x\r\n", drv8711_read_reg(csid, DRV8711_STATUS_ADDRESS));
+}
+
 void drv8711_init(uint8_t csid){
-    drv8711_write_ctrl(csid, ENBL_ENABLE, RDIR_DIR_PIN, RSTEP_NO_ACT, STEP_1_16, INTERNAL_DETECT, GAIN_20, DTIME_850_NS);
-    drv8711_write_torque(csid, 0xAA, SMPLTH_50_US);
-    drv8711_write_off(csid, 0x30, PWMMODE_INT_INDEXER); 
-    drv8711_write_blank(csid, 0x80, ABT_ENABLE ); 
-    drv8711_write_decay(csid, 0x10, DECMOD_3); 
+    drv8711_write_ctrl(csid, ENBL_ENABLE, RDIR_DIR_PIN, RSTEP_NO_ACT, STEP_1_8, INTERNAL_DETECT, GAIN_20, DTIME_850_NS);
+    drv8711_write_torque(csid, 0x6E, SMPLTH_50_US);
+    drv8711_write_off(csid, 0x14, PWMMODE_INT_INDEXER); 
+    drv8711_write_blank(csid, 0x1E, ABT_ENABLE ); 
+    drv8711_write_decay(csid, 0x10, DECMOD_5); 
     drv8711_write_stall(csid, 0x40, SDCNT_EIGTH_STEP, VDIV_DIV_4);
     drv8711_write_drive(csid, OCPTH_500_MV, OCPDEG_2_US, TDRIVEN_500_NS, TDRIVEP_500_NS, IDRIVEN_100_MA, IDRIVEP_50_MA);
     drv8711_write_status(csid, 0x00);

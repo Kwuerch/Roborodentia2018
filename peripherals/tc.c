@@ -9,8 +9,8 @@ void tc_init(){
                                AVR32_TC_CMR0_WAVSEL_UP_AUTO << AVR32_TC_CMR0_WAVSEL_OFFSET |
                                AVR32_TC_CMR0_TCCLKS_TIMER_CLOCK2 << AVR32_TC_CMR0_TCCLKS_OFFSET;
 
-    AVR32_TC0.channel[0].ra = 4000;
-    AVR32_TC0.channel[0].rc = 8000;
+    AVR32_TC0.channel[0].ra = 0;
+    AVR32_TC0.channel[0].rc = 0;
     AVR32_TC0.channel[0].ccr = AVR32_TC_SWTRG_MASK | AVR32_TC_CLKEN_MASK;
 
     // GENERATE SIGNALS: Waveform operating mode.
@@ -21,8 +21,8 @@ void tc_init(){
                                AVR32_TC_CMR0_WAVSEL_UP_AUTO << AVR32_TC_CMR0_WAVSEL_OFFSET |
                                AVR32_TC_CMR0_TCCLKS_TIMER_CLOCK2 << AVR32_TC_CMR0_TCCLKS_OFFSET;
 
-    AVR32_TC0.channel[1].ra = 4000;
-    AVR32_TC0.channel[1].rc = 8000;
+    AVR32_TC0.channel[1].ra = 0;
+    AVR32_TC0.channel[1].rc = 0;
     AVR32_TC0.channel[1].ccr = AVR32_TC_SWTRG_MASK | AVR32_TC_CLKEN_MASK;
 
     // GENERATE SIGNALS: Waveform operating mode.
@@ -33,8 +33,8 @@ void tc_init(){
                                AVR32_TC_CMR0_WAVSEL_UP_AUTO << AVR32_TC_CMR0_WAVSEL_OFFSET |
                                AVR32_TC_CMR0_TCCLKS_TIMER_CLOCK2 << AVR32_TC_CMR0_TCCLKS_OFFSET;
 
-    AVR32_TC1.channel[0].ra = 4000;
-    AVR32_TC1.channel[0].rc = 8000;
+    AVR32_TC1.channel[0].ra = 0;
+    AVR32_TC1.channel[0].rc = 0;
     AVR32_TC1.channel[0].ccr = AVR32_TC_SWTRG_MASK | AVR32_TC_CLKEN_MASK;
 
     // GENERATE SIGNALS: Waveform operating mode.
@@ -45,7 +45,7 @@ void tc_init(){
                                AVR32_TC_CMR0_WAVSEL_UP_AUTO << AVR32_TC_CMR0_WAVSEL_OFFSET |
                                AVR32_TC_CMR0_TCCLKS_TIMER_CLOCK2 << AVR32_TC_CMR0_TCCLKS_OFFSET;
 
-    AVR32_TC1.channel[1].ra = 4000;
-    AVR32_TC1.channel[1].rc = 8000;
+    AVR32_TC1.channel[1].ra = 0;
+    AVR32_TC1.channel[1].rc = 0;
     AVR32_TC1.channel[1].ccr = AVR32_TC_SWTRG_MASK | AVR32_TC_CLKEN_MASK;
 }

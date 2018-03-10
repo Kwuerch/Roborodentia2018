@@ -23,6 +23,12 @@ int main(void){
     AVR32_GPIO.port[1].oder = 0x0F;
     AVR32_GPIO.port[1].ovr = 0x00;
 
+    AVR32_GPIO.port[3].gpers = 0x20000;
+    AVR32_GPIO.port[3].oderc = 0x20000;
+    AVR32_GPIO.port[3].puers = 0x20000;
+
+
+
     scif_enable_RC120MCR();
 
     /** This clock is not used **/
@@ -38,11 +44,13 @@ int main(void){
     pm_divide_clk(PBB_CLK, CLK_DIV_2);
     pm_divide_clk(PBC_CLK, CLK_DIV_2);
 
+    while(AVR32_GPIO.port[3].pvr & 0x20000);
+
     init_twi();
     init_spi();
 
     console_init();
-    vl53l0x_init_all();
+    //vl53l0x_init_all();
 
     console_printf("Hello Again\r\n");
 
@@ -60,19 +68,21 @@ int main(void){
     pwm_init();
     
     //180 corresponds to 2.1kHz
-    //1 corresponds to 690 Hz
-    drive_motor(DRV8711_FL, 0, 1);
-    drive_motor(DRV8711_FR, 0, 180);
-    drive_motor(DRV8711_BR, 0, 60);
-    drive_motor(DRV8711_BL, 0, 70);
+    //1 corresponds to 620 Hz
+    drive_motors_ramp(DRV8711_FL, DRV8711_BR, 0, 1, 255);
+    drive_motors_ramp(DRV8711_FR, DRV8711_BL, 0, 1, 0);
 
-    uint16_t xVal, yVal;
+    //uint16_t xVal, yVal;
     while(1){
+        /**
         xVal = getXPosition();
         console_printf("X Value: %u\r\n", xVal);
 
         yVal = getYPosition();
         console_printf("Y Value: %u\r\n", yVal);
+        **/
+
+        drv8711_print_registers(DRV8711_FL);
 
         /**
         while(count++ < 2000){
