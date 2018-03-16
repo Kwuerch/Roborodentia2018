@@ -8,8 +8,6 @@
 char strBuf[STR_BUF_SIZE];
 
 void console_init(){
-    init_usart();
-    console_print_str("Hello\r\n");
 }
 
 void console_printf(char* format, ...){

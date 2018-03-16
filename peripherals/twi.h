@@ -31,6 +31,7 @@ typedef enum{
 }TWI_MODE;
 
 
+void TWIM0_INIT();
 void twi_enable(volatile avr32_twim_t* twim, uint32_t speed, uint32_t pba_hz);
 TWI_STATUS twi_write_reg(unsigned char saddr, unsigned char reg, unsigned char* data, int nbytes);
 TWI_STATUS twi_read_reg(unsigned char saddr, unsigned char reg, unsigned char* data, int nbytes);

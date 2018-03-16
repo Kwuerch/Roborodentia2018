@@ -2,6 +2,19 @@
 #include "console.h"
 #include "delay.h"
 #include "twi.h"
+#include "board.h"
+#include "gpio.h"
+
+void TWIM0_INIT(){
+    gpioInit gi;
+    gi.pins = TWID_PIN | TWICK_PIN;
+    gi.type = GPIO_AF;
+    gi.port = TWI0_PORT;
+    gi.af = FUNC_A;
+    gpio_init(&gi);
+
+    twi_enable(TWIM0, TWI_SPEED, PBA_HZ);
+}
 
 // twim_110
 void twi_enable(volatile avr32_twim_t* twim, uint32_t speed, uint32_t pba_hz ){

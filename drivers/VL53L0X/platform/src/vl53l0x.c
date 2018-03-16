@@ -235,7 +235,6 @@ void vl53l0x_init_dev(VL53L0X_ID id){
 
 void vl53l0x_init_all(){
     /** Initialize Pins & Shutdown **/
-    init_vl53l0x_sd();
     AVR32_GPIO.port[VL53L0X_AVDD_PORT].ovrs = (VL53L0X_AVDD_PIN);
 
     delay_ms(10);

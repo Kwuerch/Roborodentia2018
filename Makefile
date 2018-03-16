@@ -29,7 +29,9 @@ SOURCES += $(PERIPHERALS)/flash.c \
 			$(PERIPHERALS)/usart.c \
 			$(PERIPHERALS)/spi_master.c \
 			$(PERIPHERALS)/tc.c \
-			$(PERIPHERALS)/pwm.c
+			$(PERIPHERALS)/pwm.c \
+			$(PERIPHERALS)/gpio.c \
+			$(PERIPHERALS)/spi.c
 
 
 SOURCES += $(CONFIG)/board.c

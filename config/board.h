@@ -19,6 +19,7 @@
 
 /** TWIM **/
 #define TWIM ((avr32_twim_t*)AVR32_TWIM0_ADDRESS)
+#define TWIM0 ((avr32_twim_t*)AVR32_TWIM0_ADDRESS)
 
 #define TWI_FUNC 0
 #define TWI0_PORT (AVR32_TWIMS0_TWD_0_0_PIN / 32)
@@ -28,6 +29,7 @@
 #define TWI_SPEED 400000 // 400kHz
 
 /** USART **/
+#define USART1 ((avr32_usart_t*)AVR32_USART1_ADDRESS)
 #define USART ((avr32_usart_t*)AVR32_USART1_ADDRESS)
 
 #define USART1_FUNC 0
@@ -37,6 +39,7 @@
 
 /** SPI **/
 #define SPI ((avr32_spi_t*)AVR32_SPI0_ADDRESS)
+#define SPI0 ((avr32_spi_t*)AVR32_SPI0_ADDRESS)
 
 #define SPI_FUNC 0
 #define SPI0_PORT (AVR32_SPI0_MISO_PIN / 32)
@@ -128,13 +131,6 @@ typedef enum VL53L0X_ID{
 #define VL53L0X_AVDD_PIN ((uint32_t)(1 << 31))
 
 /** Function Prototypes **/
-void init_twi();
-void init_spi();
-void init_usart();
-void init_vl53l0x_sd();
-void init_drv8711_step();
-void init_drv8711_ctrl();
-void init_drv8711_dir();
-void init_pwm_step();
+void init_board();
 
 #endif

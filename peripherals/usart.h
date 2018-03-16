@@ -229,4 +229,6 @@ extern void usart_write_line(volatile avr32_usart_t *usart, const char *string);
 
 extern int usart_get_echo_line(volatile avr32_usart_t *usart);
 
+void USART1_INIT();
+
 #endif  // _USART_H_

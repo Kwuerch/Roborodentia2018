@@ -45,6 +45,26 @@
 
 
 #include "usart.h"
+#include "board.h"
+#include "gpio.h"
+
+void USART1_INIT(){
+    gpioInit gi;
+    gi.pins = RX_PIN | TX_PIN;
+    gi.type = GPIO_AF;
+    gi.port = USART1_PORT;
+    gi.af = FUNC_A;
+    gpio_init(&gi);
+
+    usart_options_t opts;
+    opts.baudrate = 38400;
+    opts.charlength = 8;
+    opts.paritytype = USART_NO_PARITY;
+    opts.stopbits = USART_1_STOPBIT;
+    opts.channelmode = USART_NORMAL_CHMODE;
+
+    usart_init_rs232(USART1, &opts, PBA_HZ);
+}
 
 
 //------------------------------------------------------------------------------

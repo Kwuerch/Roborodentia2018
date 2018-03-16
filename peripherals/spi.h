@@ -346,4 +346,6 @@ extern spi_status_t spi_read(volatile avr32_spi_t *spi, uint16_t *data);
 
 extern unsigned char spi_getStatus(volatile avr32_spi_t *spi);
 
+void SPI0_INIT();
+
 #endif  // _SPI_H_
