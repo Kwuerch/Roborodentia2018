@@ -77,6 +77,9 @@ typedef enum DRV8711_ID{
    DRV8711_BL
 }DRV8711_ID;
 
+#define DRV8711_ON_TORQUE ((uint8_t)0x6E)
+#define DRV8711_OFF_TORQUE ((uint8_t)0x50)
+
 #define DRV8711_DIR_PORT 3
 #define DRV8711_DIR_PIN_A ((uint32_t)(1 << 7))
 #define DRV8711_DIR_PIN_B ((uint32_t)(1 << 8))
@@ -132,5 +135,6 @@ typedef enum VL53L0X_ID{
 
 /** Function Prototypes **/
 void init_board();
+void init_drivers();
 
 #endif

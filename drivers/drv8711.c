@@ -243,7 +243,7 @@ void drv8711_print_registers(uint8_t csid){
 
 void drv8711_init(uint8_t csid){
     drv8711_write_ctrl(csid, ENBL_ENABLE, RDIR_DIR_PIN, RSTEP_NO_ACT, STEP_1_8, INTERNAL_DETECT, GAIN_20, DTIME_850_NS);
-    drv8711_write_torque(csid, 0x6E, SMPLTH_50_US);
+    drv8711_write_torque(csid, DRV8711_ON_TORQUE, SMPLTH_50_US);
     drv8711_write_off(csid, 0x14, PWMMODE_INT_INDEXER); 
     drv8711_write_blank(csid, 0x1E, ABT_ENABLE ); 
     drv8711_write_decay(csid, 0x10, DECMOD_5); 

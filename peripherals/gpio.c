@@ -13,6 +13,7 @@ void GPIO_INIT(){
 
     /** VL53L0X Voltage Regulator Pin **/
     gi.pins = VL53L0X_AVDD_PIN;
+    gi.type = GPIO_OUTPUT;
     gi.port = VL53L0X_AVDD_PORT;
     gpio_init(&gi);
 
@@ -31,108 +32,79 @@ void GPIO_INIT(){
     gi.port = DRV8711_DIR_PORT;
     gpio_init(&gi);
 
-    /** Button Input **/
-    gi.pins = GPIO_PIN_17;
+    /** Button Inputs **/
+    gi.pins = GPIO_PIN_16 | GPIO_PIN_17;
     gi.type = GPIO_INPUT_PU;
+    gi.port = PORT_D;
+    gpio_init(&gi);
+
+    /** LED Outputs **/
+    gi.pins = GPIO_PIN_21 | GPIO_PIN_20 | GPIO_PIN_19 | GPIO_PIN_18;
+    gi.type = GPIO_OUTPUT;
+    gi.port = PORT_D;
     gpio_init(&gi);
 }
 
 void gpio_init(gpioInit* gi){
-    if(gi -> type == GPIO_AF){
-        switch(gi -> af){
-            case FUNC_A:
-                AVR32_GPIO.port[gi->port].pmr2c = gi->pins;
-                AVR32_GPIO.port[gi->port].pmr1c = gi->pins;
-                AVR32_GPIO.port[gi->port].pmr0c = gi->pins;
-                break;
-            case FUNC_B:
-                AVR32_GPIO.port[gi->port].pmr2c = gi->pins;
-                AVR32_GPIO.port[gi->port].pmr1c = gi->pins;
-                AVR32_GPIO.port[gi->port].pmr0s = gi->pins;
-                break;
-            case FUNC_C:
-                AVR32_GPIO.port[gi->port].pmr2c = gi->pins;
-                AVR32_GPIO.port[gi->port].pmr1s = gi->pins;
-                AVR32_GPIO.port[gi->port].pmr0c = gi->pins;
-                break;
-            case FUNC_D:
-                AVR32_GPIO.port[gi->port].pmr2c = gi->pins;
-                AVR32_GPIO.port[gi->port].pmr1s = gi->pins;
-                AVR32_GPIO.port[gi->port].pmr0s = gi->pins;
-                break;
-            case FUNC_E:
-                AVR32_GPIO.port[gi->port].pmr2s = gi->pins;
-                AVR32_GPIO.port[gi->port].pmr1c = gi->pins;
-                AVR32_GPIO.port[gi->port].pmr0c = gi->pins;
-                break;
-            case FUNC_F:
-                AVR32_GPIO.port[gi->port].pmr2s = gi->pins;
-                AVR32_GPIO.port[gi->port].pmr1c = gi->pins;
-                AVR32_GPIO.port[gi->port].pmr0s = gi->pins;
-                break;
-        }
+    switch(gi -> type){
+        case GPIO_OUTPUT:
+            AVR32_GPIO.port[gi->port].oders = gi->pins;
+            AVR32_GPIO.port[gi->port].ovrc = gi->pins;
+            AVR32_GPIO.port[gi->port].gpers = gi->pins;
+            break;
+        case GPIO_INPUT_NOPULL:
+            AVR32_GPIO.port[gi->port].oderc = gi->pins;
+            AVR32_GPIO.port[gi->port].puerc = gi->pins;
+            AVR32_GPIO.port[gi->port].pderc = gi->pins;
+            AVR32_GPIO.port[gi->port].gpers = gi->pins;
+            break;
+        case GPIO_INPUT_PU:
+            AVR32_GPIO.port[gi->port].oderc = gi->pins;
+            AVR32_GPIO.port[gi->port].puers = gi->pins;
+            AVR32_GPIO.port[gi->port].pderc = gi->pins;
+            AVR32_GPIO.port[gi->port].gpers = gi->pins;
+            break;
+        case GPIO_INPUT_PD:
+            AVR32_GPIO.port[gi->port].oderc = gi->pins;
+            AVR32_GPIO.port[gi->port].puerc = gi->pins;
+            AVR32_GPIO.port[gi->port].pders = gi->pins;
+            AVR32_GPIO.port[gi->port].gpers = gi->pins;
+            break;
+        case GPIO_AF:
+            switch(gi -> af){
+                case FUNC_A:
+                    AVR32_GPIO.port[gi->port].pmr2c = gi->pins;
+                    AVR32_GPIO.port[gi->port].pmr1c = gi->pins;
+                    AVR32_GPIO.port[gi->port].pmr0c = gi->pins;
+                    break;
+                case FUNC_B:
+                    AVR32_GPIO.port[gi->port].pmr2c = gi->pins;
+                    AVR32_GPIO.port[gi->port].pmr1c = gi->pins;
+                    AVR32_GPIO.port[gi->port].pmr0s = gi->pins;
+                    break;
+                case FUNC_C:
+                    AVR32_GPIO.port[gi->port].pmr2c = gi->pins;
+                    AVR32_GPIO.port[gi->port].pmr1s = gi->pins;
+                    AVR32_GPIO.port[gi->port].pmr0c = gi->pins;
+                    break;
+                case FUNC_D:
+                    AVR32_GPIO.port[gi->port].pmr2c = gi->pins;
+                    AVR32_GPIO.port[gi->port].pmr1s = gi->pins;
+                    AVR32_GPIO.port[gi->port].pmr0s = gi->pins;
+                    break;
+                case FUNC_E:
+                    AVR32_GPIO.port[gi->port].pmr2s = gi->pins;
+                    AVR32_GPIO.port[gi->port].pmr1c = gi->pins;
+                    AVR32_GPIO.port[gi->port].pmr0c = gi->pins;
+                    break;
+                case FUNC_F:
+                    AVR32_GPIO.port[gi->port].pmr2s = gi->pins;
+                    AVR32_GPIO.port[gi->port].pmr1c = gi->pins;
+                    AVR32_GPIO.port[gi->port].pmr0s = gi->pins;
+                    break;
+            }
 
-        AVR32_GPIO.port[gi->port].gperc = gi->pins;
-        switch(gi -> type){
-            case GPIO_OUTPUT:
-                AVR32_GPIO.port[gi->port].oders = gi->pins;
-                AVR32_GPIO.port[gi->port].ovrc = gi->pins;
-                AVR32_GPIO.port[gi->port].gpers = gi->pins;
-                break;
-            case GPIO_INPUT_NOPULL:
-                AVR32_GPIO.port[gi->port].oderc = gi->pins;
-                AVR32_GPIO.port[gi->port].puerc = gi->pins;
-                AVR32_GPIO.port[gi->port].pderc = gi->pins;
-                AVR32_GPIO.port[gi->port].gpers = gi->pins;
-                break;
-            case GPIO_INPUT_PU:
-                AVR32_GPIO.port[gi->port].oderc = gi->pins;
-                AVR32_GPIO.port[gi->port].puers = gi->pins;
-                AVR32_GPIO.port[gi->port].pderc = gi->pins;
-                AVR32_GPIO.port[gi->port].gpers = gi->pins;
-                break;
-            case GPIO_INPUT_PD:
-                AVR32_GPIO.port[gi->port].oderc = gi->pins;
-                AVR32_GPIO.port[gi->port].puerc = gi->pins;
-                AVR32_GPIO.port[gi->port].pders = gi->pins;
-                AVR32_GPIO.port[gi->port].gpers = gi->pins;
-                break;
-            case GPIO_AF:
-                switch(gi -> af){
-                    case FUNC_A:
-                        AVR32_GPIO.port[gi->port].pmr2c = gi->pins;
-                        AVR32_GPIO.port[gi->port].pmr1c = gi->pins;
-                        AVR32_GPIO.port[gi->port].pmr0c = gi->pins;
-                        break;
-                    case FUNC_B:
-                        AVR32_GPIO.port[gi->port].pmr2c = gi->pins;
-                        AVR32_GPIO.port[gi->port].pmr1c = gi->pins;
-                        AVR32_GPIO.port[gi->port].pmr0s = gi->pins;
-                        break;
-                    case FUNC_C:
-                        AVR32_GPIO.port[gi->port].pmr2c = gi->pins;
-                        AVR32_GPIO.port[gi->port].pmr1s = gi->pins;
-                        AVR32_GPIO.port[gi->port].pmr0c = gi->pins;
-                        break;
-                    case FUNC_D:
-                        AVR32_GPIO.port[gi->port].pmr2c = gi->pins;
-                        AVR32_GPIO.port[gi->port].pmr1s = gi->pins;
-                        AVR32_GPIO.port[gi->port].pmr0s = gi->pins;
-                        break;
-                    case FUNC_E:
-                        AVR32_GPIO.port[gi->port].pmr2s = gi->pins;
-                        AVR32_GPIO.port[gi->port].pmr1c = gi->pins;
-                        AVR32_GPIO.port[gi->port].pmr0c = gi->pins;
-                        break;
-                    case FUNC_F:
-                        AVR32_GPIO.port[gi->port].pmr2s = gi->pins;
-                        AVR32_GPIO.port[gi->port].pmr1c = gi->pins;
-                        AVR32_GPIO.port[gi->port].pmr0s = gi->pins;
-                        break;
-                }
-
-                AVR32_GPIO.port[gi->port].gperc = gi->pins;
-                break;
-        }
+            AVR32_GPIO.port[gi->port].gperc = gi->pins;
+            break;
     }
 }

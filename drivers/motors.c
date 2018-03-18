@@ -4,6 +4,7 @@
 #include "drv8711.h"
 #include "vl53l0x.h"
 #include "delay.h"
+#include "console.h"
 
 #define RAMP_DELAY_MS 3
 
@@ -92,7 +93,7 @@ void drive_motor(DRV8711_ID id, uint8_t dir, uint8_t speed){
 
     if(speed){
         if(cur_speed[id] == 0){
-            drv8711_write_torque(id, 0x6E, SMPLTH_50_US);
+            drv8711_write_torque(id, DRV8711_ON_TORQUE, SMPLTH_50_US);
         }
 
         (tc -> channel)[chan].ra = SPEED_LUT[speed];
@@ -101,7 +102,7 @@ void drive_motor(DRV8711_ID id, uint8_t dir, uint8_t speed){
         (tc -> channel)[chan].ra = 0;
         (tc -> channel)[chan].rc = 0;
         if(cur_speed[id] != 0){
-            drv8711_write_torque(id, 0x50, SMPLTH_50_US);
+            drv8711_write_torque(id, DRV8711_OFF_TORQUE, SMPLTH_50_US);
         }
     }
 
@@ -145,7 +146,7 @@ void drive_motor_ramp(DRV8711_ID id, uint8_t dir, uint8_t speed){
     }
 
     if(speed != 0){
-        drv8711_write_torque(id, 0x6E, SMPLTH_50_US);
+        drv8711_write_torque(id, DRV8711_ON_TORQUE, SMPLTH_50_US);
     }
 
     /**
@@ -174,7 +175,7 @@ void drive_motor_ramp(DRV8711_ID id, uint8_t dir, uint8_t speed){
     if(cur_speed[id] == 0){
         (tc -> channel)[chan].ra = 0;
         (tc -> channel)[chan].rc = 0;
-        drv8711_write_torque(id, 0x50, SMPLTH_50_US);
+        drv8711_write_torque(id, DRV8711_OFF_TORQUE, SMPLTH_50_US);
     }
 }
 
@@ -253,8 +254,8 @@ void drive_motors_ramp(DRV8711_ID id1, DRV8711_ID id2, uint8_t dir1, uint8_t dir
     }
 
     if(speed != 0){
-        drv8711_write_torque(id1, 0x6E, SMPLTH_50_US);
-        drv8711_write_torque(id2, 0x6E, SMPLTH_50_US);
+        drv8711_write_torque(id1, DRV8711_ON_TORQUE, SMPLTH_50_US);
+        drv8711_write_torque(id2, DRV8711_ON_TORQUE, SMPLTH_50_US);
     }
 
     /**
@@ -291,9 +292,37 @@ void drive_motors_ramp(DRV8711_ID id1, DRV8711_ID id2, uint8_t dir1, uint8_t dir
         (tc1 -> channel)[chan1].rc = 0;
         (tc2 -> channel)[chan2].ra = 0;
         (tc2 -> channel)[chan2].rc = 0;
-        drv8711_write_torque(id1, 0x50, SMPLTH_50_US);
-        drv8711_write_torque(id2, 0x50, SMPLTH_50_US);
+        drv8711_write_torque(id1, DRV8711_OFF_TORQUE, SMPLTH_50_US);
+        drv8711_write_torque(id2, DRV8711_OFF_TORQUE, SMPLTH_50_US);
     }
+}
+
+void drive_toX(uint16_t x, uint16_t tol){
+    int xInRange = 0;
+    uint16_t curX;
+    int difX;
+
+    while(!xInRange){
+        curX = getXPosition();
+
+        if(curX < (x + tol) && curX > (x - tol)){
+            drive_motor(DRV8711_FR, 0, 0);
+            drive_motor(DRV8711_BL, 1, 0);
+            xInRange = 1;
+
+        }else{
+            difX = x - curX;
+            if(difX > 0){
+                drive_motor(DRV8711_FR, 0, 64);
+                drive_motor(DRV8711_BL, 1, 64);
+            }else{
+                difX *= -1;
+                drive_motor(DRV8711_BL, 0, 64);
+                drive_motor(DRV8711_FR, 1, 64);
+            }
+        }
+    }
+
 }
 
 
@@ -308,12 +337,18 @@ void drive_to(uint16_t x, uint16_t y, uint16_t tol){
         curY = getYPosition();
 
         if(curX < (x + tol) && curX > (x - tol)){
-            //moveX(0, 0);
+            drive_motors_ramp(DRV8711_FR, DRV8711_BL, 0, 1, 0);
+            drive_motors_ramp(DRV8711_FR, DRV8711_BL, 0, 1, 0);
             xInRange = 1;
 
         }else{
             difX = x - curX;
-            //moveX(scale[difx],  (diff > 0));
+            if(difX > 0){
+                drive_motors_ramp(DRV8711_FR, DRV8711_BL, 0, 1, difX >> 3);
+            }else{
+                difX *= -1;
+                drive_motors_ramp(DRV8711_FR, DRV8711_BL, 1, 0, difX >> 3);
+            }
         }
 
         if(curY < (x + tol) && curY > (x - tol)){

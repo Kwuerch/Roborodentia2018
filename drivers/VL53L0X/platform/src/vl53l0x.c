@@ -341,7 +341,7 @@ uint16_t getXPosition(){
     uint16_t lVal = medOfThree(bufL);
     uint16_t rVal = medOfThree(bufR);
 
-    console_printf("Lvalue %i, RValue %i", lVal, rVal);
+    //console_printf("Lvalue %i, RValue %i", lVal, rVal);
 
     /** Values are Valid **/
     if(lVal && rVal){
@@ -369,10 +369,8 @@ uint16_t getYPosition(){
 
     /** Measure Left Side **/
     status = VL53L0X_PerformSingleRangingMeasurement(&dev_f, &meas);
-    if(meas.RangeMilliMeter < MAX_RANGE){
-        bufF[bufFIdx] = meas.RangeMilliMeter;
-        bufFIdx = (bufFIdx + 1) % 3;
-    }
+    bufF[bufFIdx] = meas.RangeMilliMeter;
+    bufFIdx = (bufFIdx + 1) % 3;
 
     if(status != VL53L0X_ERROR_NONE){
         vl53l0x_print_error(status);
@@ -380,10 +378,8 @@ uint16_t getYPosition(){
 
     /** Measure Right Side **/
     status = VL53L0X_PerformSingleRangingMeasurement(&dev_b, &meas);
-    if(meas.RangeMilliMeter < MAX_RANGE){
-        bufB[bufBIdx] = meas.RangeMilliMeter;
-        bufBIdx = (bufBIdx + 1) % 3;
-    }
+    bufB[bufBIdx] = meas.RangeMilliMeter;
+    bufBIdx = (bufBIdx + 1) % 3;
 
     if(status != VL53L0X_ERROR_NONE){
         vl53l0x_print_error(status);
@@ -392,23 +388,31 @@ uint16_t getYPosition(){
     uint16_t fVal = medOfThree(bufF);
     uint16_t bVal = medOfThree(bufB);
 
-    console_printf("Fvalue %i, BValue %i", fVal, bVal);
+    //console_printf("Fvalue %i, BValue %i", fVal, bVal);
+
+    int fValid = 1, bValid = 1;
+
+    if(fVal == 0 || fVal > MAX_RANGE){
+        fValid = 0; 
+    }
+
+    if(bVal == 0 || bVal > MAX_RANGE){
+        bValid = 0;
+    }
 
     /** Values are Valid **/
-    if(fVal && bVal){
+    if(fValid && bValid){
         return ((bVal + BOARD_HALF_Y_SIZE) + (FIELD_Y_SIZE - BOARD_HALF_Y_SIZE - fVal)) >> 1;
     }
 
-    /** TODO - THIS MIGHT CAUSE ISSUES when hitting the ramp **/
-    /** Assuming both will work or only one will work TODO - could be an issue **/
-    if(!bVal){
+    if(fValid){
         return FIELD_Y_SIZE - BOARD_HALF_Y_SIZE - fVal;
     }
 
-    if(!fVal){
+    if(bValid){
         return bVal + BOARD_HALF_Y_SIZE;
     }
 
-    /** TODO - This could totally mess up the dynamics of driving **/
+    /**  0 Represents Invalid measurement by both sensors **/
     return 0;
 }

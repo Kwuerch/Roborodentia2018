@@ -39,7 +39,9 @@ SOURCES += $(CONFIG)/board.c
 SOURCES += $(DRIVERS)/console.c \
 			$(DRIVERS)/drv8711.c \
 			$(DRIVERS)/delay.c \
-			$(DRIVERS)/motors.c
+			$(DRIVERS)/motors.c \
+			$(DRIVERS)/led.c \
+			$(DRIVERS)/btn.c
 
 SOURCES += $(VL53L0X)/core/src/vl53l0x_api.c \
 			$(VL53L0X)/core/src/vl53l0x_api_calibration.c \

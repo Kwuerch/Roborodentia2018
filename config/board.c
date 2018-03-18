@@ -28,8 +28,10 @@ void init_board(){
     TC1_INIT();
     PWM_INIT();
     GPIO_INIT();
+}
 
-    //vl53l0x_init_all();
+void init_drivers(){
+    vl53l0x_init_all();
 
     drv8711_init(DRV8711_FL);
     drv8711_init(DRV8711_BR);
