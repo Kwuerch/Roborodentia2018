@@ -5,42 +5,43 @@
 #include "vl53l0x.h"
 #include "delay.h"
 #include "console.h"
+#include "motors.h"
 
 #define RAMP_DELAY_MS 3
 
 uint32_t SPEED_LUT[256] = {
-    0,62244,58992,56063,53412,51000,48796,46775,
-    44914,43196,41605,40126,38750,37464,36261,35133,
-    34073,33075,32134,31245,30403,29606,28850,28131,
-    27447,26796,26175,25582,25015,24473,23954,23456,
-    22979,22521,22081,21657,21250,20857,20479,20114,
-    19762,19422,19094,18776,18469,18172,17884,17605,
-    17335,17073,16819,16572,16332,16099,15873,15653,
-    15439,15231,15028,14831,14638,14451,14268,14090,
-    13917,13747,13582,13421,13263,13109,12959,12811,
-    12668,12527,12390,12255,12124,11995,11869,11745,
-    11625,11506,11390,11276,11165,11055,10948,10843,
-    10740,10639,10540,10442,10346,10252,10160,10070,
-    9981,9893,9807,9723,9640,9558,9478,9399,
-    9321,9245,9170,9096,9023,8952,8882,8812,
-    8744,8677,8611,8545,8481,8418,8356,8294,
-    8234,8174,8116,8058,8001,7944,7889,7834,
-    7780,7727,7674,7622,7571,7521,7471,7422,
-    7374,7326,7279,7232,7186,7140,7096,7051,
-    7007,6964,6922,6879,6838,6797,6756,6716,
-    6676,6637,6598,6560,6522,6484,6447,6411,
-    6375,6339,6303,6268,6234,6200,6166,6132,
-    6099,6066,6034,6002,5970,5939,5908,5877,
-    5846,5816,5786,5757,5728,5699,5670,5642,
-    5614,5586,5559,5531,5504,5478,5451,5425,
-    5399,5373,5348,5323,5298,5273,5249,5224,
-    5200,5176,5153,5129,5106,5083,5060,5038,
-    5015,4993,4971,4949,4928,4906,4885,4864,
-    4843,4823,4802,4782,4762,4742,4722,4702,
-    4683,4663,4644,4625,4606,4587,4569,4550,
-    4532,4514,4496,4478,4461,4443,4426,4408,
-    4391,4374,4357,4341,4324,4307,4291,4275,
-    4259,4243,4227,4211,4195,4180,4164,4149,
+    0,31431,30639,29886,29169,28486,27834,27211,
+    26616,26046,25500,24976,24473,23990,23526,23080,
+    22650,22236,21837,21451,21080,20720,20373,20038,
+    19713,19398,19094,18799,18512,18235,17965,17704,
+    17450,17203,16963,16730,16503,16282,16067,15857,
+    15653,15454,15260,15071,14887,14706,14531,14359,
+    14192,14028,13868,13712,13559,13409,13263,13120,
+    12980,12843,12709,12577,12448,12322,12199,12077,
+    11959,11842,11728,11616,11506,11398,11292,11188,
+    11086,10986,10888,10791,10696,10603,10511,10421,
+    10333,10246,10160,10076,9993,9912,9832,9753,
+    9675,9599,9524,9450,9377,9305,9234,9165,
+    9096,9029,8962,8897,8832,8768,8705,8644,
+    8583,8522,8463,8405,8347,8290,8234,8178,
+    8124,8070,8017,7964,7912,7861,7811,7761,
+    7712,7663,7615,7568,7521,7475,7429,7384,
+    7339,7295,7252,7209,7166,7124,7083,7042,
+    7001,6961,6922,6882,6844,6805,6767,6730,
+    6693,6656,6620,6584,6549,6514,6479,6445,
+    6411,6377,6344,6311,6278,6246,6214,6183,
+    6151,6120,6090,6059,6029,6000,5970,5941,
+    5912,5883,5855,5827,5799,5772,5744,5717,
+    5691,5664,5638,5612,5586,5561,5535,5510,
+    5485,5461,5436,5412,5388,5364,5341,5317,
+    5294,5271,5249,5226,5204,5181,5159,5138,
+    5116,5095,5073,5052,5031,5011,4990,4970,
+    4949,4929,4909,4890,4870,4851,4831,4812,
+    4793,4774,4756,4737,4719,4701,4683,4665,
+    4647,4629,4612,4594,4577,4560,4543,4526,
+    4509,4492,4476,4459,4443,4427,4411,4395,
+    4379,4363,4348,4332,4317,4302,4286,4271,
+    4256,4242,4227,4212,4198,4183,4169,4155
 };
 
 static uint8_t cur_speed[4] = {
@@ -54,7 +55,7 @@ uint8_t SCALE_LUT[256] = {
 }
 **/
 
-void drive_motor(DRV8711_ID id, uint8_t dir, uint8_t speed){
+void drive_motor(DRV8711_ID id, uint8_t dir, uint8_t torque, uint8_t speed){
     uint32_t pin;
     uint8_t chan;
     volatile avr32_tc_t* tc;
@@ -93,7 +94,7 @@ void drive_motor(DRV8711_ID id, uint8_t dir, uint8_t speed){
 
     if(speed){
         if(cur_speed[id] == 0){
-            drv8711_write_torque(id, DRV8711_ON_TORQUE, SMPLTH_50_US);
+            drv8711_write_torque(id, torque, SMPLTH_50_US);
         }
 
         (tc -> channel)[chan].ra = SPEED_LUT[speed];
@@ -109,7 +110,7 @@ void drive_motor(DRV8711_ID id, uint8_t dir, uint8_t speed){
     cur_speed[id] = speed;
 }
 
-void drive_motor_ramp(DRV8711_ID id, uint8_t dir, uint8_t speed){
+void drive_motor_ramp(DRV8711_ID id, uint8_t dir, uint8_t torque, uint8_t speed){
     uint32_t pin;
     uint8_t chan;
     volatile avr32_tc_t* tc;
@@ -146,7 +147,7 @@ void drive_motor_ramp(DRV8711_ID id, uint8_t dir, uint8_t speed){
     }
 
     if(speed != 0){
-        drv8711_write_torque(id, DRV8711_ON_TORQUE, SMPLTH_50_US);
+        drv8711_write_torque(id, torque, SMPLTH_50_US);
     }
 
     /**
@@ -183,10 +184,11 @@ void drive_motor_ramp(DRV8711_ID id, uint8_t dir, uint8_t speed){
  * Precondition - Motors are currently running at the same speed
  *
  */
-void drive_motors_ramp(DRV8711_ID id1, DRV8711_ID id2, uint8_t dir1, uint8_t dir2, uint8_t speed){
+void drive_motors_ramp(DRV8711_ID id1, DRV8711_ID id2, uint8_t dir1, uint8_t dir2, uint8_t torque, uint8_t speed){
     uint32_t pin1;
     uint8_t chan1;
     volatile avr32_tc_t* tc1;
+
     uint32_t pin2;
     uint8_t chan2;
     volatile avr32_tc_t* tc2;
@@ -254,8 +256,8 @@ void drive_motors_ramp(DRV8711_ID id1, DRV8711_ID id2, uint8_t dir1, uint8_t dir
     }
 
     if(speed != 0){
-        drv8711_write_torque(id1, DRV8711_ON_TORQUE, SMPLTH_50_US);
-        drv8711_write_torque(id2, DRV8711_ON_TORQUE, SMPLTH_50_US);
+        drv8711_write_torque(id1, torque, SMPLTH_50_US);
+        drv8711_write_torque(id2, torque, SMPLTH_50_US);
     }
 
     /**
@@ -305,27 +307,33 @@ void drive_toX(uint16_t x, uint16_t tol){
     while(!xInRange){
         curX = getXPosition();
 
-        if(curX < (x + tol) && curX > (x - tol)){
-            drive_motor(DRV8711_FR, 0, 0);
-            drive_motor(DRV8711_BL, 1, 0);
-            xInRange = 1;
+        /** Zero values are Invalid and should not be considered **/
+        if(!curX){
+            continue;
+        }
 
+        if(curX < (x + tol) && curX > (x - tol)){
+            xInRange = 1;
         }else{
             difX = x - curX;
             if(difX > 0){
-                drive_motor(DRV8711_FR, 0, 64);
-                drive_motor(DRV8711_BL, 1, 64);
+                drive_motors_ramp(DRV8711_FR, DRV8711_BL, 0, 1, DRV8711_ON_TORQUE, difX >> 2);
             }else{
                 difX *= -1;
-                drive_motor(DRV8711_BL, 0, 64);
-                drive_motor(DRV8711_FR, 1, 64);
+                drive_motors_ramp(DRV8711_FR, DRV8711_BL, 1, 0, DRV8711_ON_TORQUE, difX >> 2);
             }
         }
     }
 
+    drive_motor(DRV8711_FR, 0, DRV8711_ON_TORQUE, 0);
+    drive_motor(DRV8711_BL, 1, DRV8711_ON_TORQUE, 0);
+
+    /** Clears the Median of Three Buffer so that values are not used in futue calls **/
+    //positionBufferXClear();
+
 }
 
-
+/**
 void drive_to(uint16_t x, uint16_t y, uint16_t tol){
     int xInRange = 0;
     int yInRange = 0;
@@ -361,3 +369,4 @@ void drive_to(uint16_t x, uint16_t y, uint16_t tol){
         }
     }
 }
+**/

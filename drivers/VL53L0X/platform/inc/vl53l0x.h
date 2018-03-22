@@ -18,6 +18,7 @@ VL53L0X_Error vl53l0x_set_addresss(VL53L0X_DEV dev, uint8_t addr);
 VL53L0X_Error vl53l0x_init_longrange(VL53L0X_DEV dev);
 
 VL53L0X_Error vl53l0x_calibrate(VL53L0X_DEV dev);
+void vl53l0x_calibrate_all();
 
 void vl53l0x_print_error(VL53L0X_Error err);
 
@@ -27,5 +28,8 @@ uint16_t vl53l0x_measure(VL53L0X_ID id);
 
 uint16_t getXPosition();
 uint16_t getYPosition();
+
+void positionBufferXClear();
+void positionBufferYClear();
 
 #endif

@@ -3,6 +3,7 @@
 #include "console.h"
 #include "delay.h"
 #include "vl53l0x.h"
+#include "btn.h"
 
 VL53L0X_Error vl53l0x_set_address(VL53L0X_DEV dev, uint8_t addr);
 
@@ -10,7 +11,6 @@ VL53L0X_Dev_t dev_f = {.I2cDevAddr = VL53L0X_ADDR_F, .pin = VL53L0X_SD_PIN_F};
 VL53L0X_Dev_t dev_b = {.I2cDevAddr = VL53L0X_ADDR_B, .pin = VL53L0X_SD_PIN_B};
 VL53L0X_Dev_t dev_r = {.I2cDevAddr = VL53L0X_ADDR_R, .pin = VL53L0X_SD_PIN_R};
 VL53L0X_Dev_t dev_l = {.I2cDevAddr = VL53L0X_ADDR_L, .pin = VL53L0X_SD_PIN_L};
-
 
 VL53L0X_Error vl53l0x_init(VL53L0X_DEV dev){
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
@@ -120,10 +120,37 @@ VL53L0X_Error vl53l0x_calibrate(VL53L0X_DEV dev){
         console_print_str("Calibration Error\r\n");
     }
 
-    while(1);
+    console_print_str("Calibration Complete\r\n");
 
     return Status;
 }
+
+void vl53l0x_calibrate_all(){
+	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
+
+    console_print_str("Calibrating Front: Press Button 2\r\n");
+    while(!btn_is_pressed(BTN_2));
+    Status = vl53l0x_calibrate(&dev_f);
+
+    console_print_str("Calibrating Right: Press Button 2\r\n");
+    while(!btn_is_pressed(BTN_2));
+    Status = vl53l0x_calibrate(&dev_r);
+
+    console_print_str("Calibrating Back: Press Button 2\r\n");
+    while(!btn_is_pressed(BTN_2));
+    Status = vl53l0x_calibrate(&dev_b);
+
+    console_print_str("Calibrating Left: Press Button 2\r\n");
+    while(!btn_is_pressed(BTN_2));
+    Status = vl53l0x_calibrate(&dev_l);
+
+    if(Status != VL53L0X_ERROR_NONE){
+        console_print_str("Calibration Error\r\n");
+    }
+
+    while(1);
+}
+
 
 VL53L0X_Error vl53l0x_init_longrange(VL53L0X_DEV dev){
     VL53L0X_Error Status = VL53L0X_ERROR_NONE;
@@ -341,24 +368,20 @@ uint16_t getXPosition(){
     uint16_t lVal = medOfThree(bufL);
     uint16_t rVal = medOfThree(bufR);
 
-    //console_printf("Lvalue %i, RValue %i", lVal, rVal);
-
     /** Values are Valid **/
     if(lVal && rVal){
         return ((lVal + BOARD_HALF_X_SIZE) + (FIELD_X_SIZE - BOARD_HALF_X_SIZE - rVal)) >> 1;
     }
 
-    /** TODO - THIS MIGHT CAUSE ISSUES when hitting the ramp **/
-    /** Assuming both will work or only one will work TODO - could be an issue **/
-    if(!lVal){
+    if(!lVal && rVal){
         return FIELD_X_SIZE - BOARD_HALF_X_SIZE - rVal;
     }
 
-    if(!rVal){
+    if(!rVal && lVal){
         return lVal + BOARD_HALF_X_SIZE;
     }
 
-    /** TODO - This could totally mess up the dynamics of driving **/
+    /** Could not Determine Position Accurately **/
     return 0;
 }
 
@@ -415,4 +438,20 @@ uint16_t getYPosition(){
 
     /**  0 Represents Invalid measurement by both sensors **/
     return 0;
+}
+
+void positionBufferXClear(){
+    int i = 0;
+    for(i = 0; i < 3; i++){
+        bufL[i] = 0;
+        bufR[i] = 0;
+    }
+}
+
+void positionBufferYClear(){
+    int i = 0;
+    for(i = 0; i < 3; i++){
+        bufF[i] = 0;
+        bufB[i] = 0;
+    }
 }

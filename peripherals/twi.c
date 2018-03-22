@@ -53,12 +53,13 @@ TWI_STATUS twi_run(volatile avr32_twim_t* twim, TWI_MODE mode, uint8_t* data, in
             int timeout = 0;
 
             int rbts = (twim->cmdr & AVR32_TWIM_CMDR_NBYTES_MASK) >> AVR32_TWIM_CMDR_NBYTES_OFFSET;
-            delay_100_us();
-            delay_100_us();
-            delay_100_us();
-            delay_100_us();
-            delay_100_us();
+            delay_65_us();
+            //delay_100_us();
+            //delay_100_us();
+            //delay_100_us();
             /**
+            delay_100_us();
+            delay_100_us();
             delay_100_us();
             **/
 

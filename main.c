@@ -96,23 +96,45 @@ int main(void){
 
     init_board();
     init_drivers();
-
+ 
     console_printf("Hello\r\n");
     led_set(LED_1 | LED_3);
     
     while(!btn_is_pressed(BTN_1));
+
+    /**
+    AVR32_GPIO.port[1].oders = 0x01;
+    AVR32_GPIO.port[1].ovrc = 0x01;
+    AVR32_GPIO.port[1].gpers = 0x01;
+
+    uint16_t xVal;
+    AVR32_GPIO.port[1].ovrs = 0x01;
+    delay_ms(1);
+    AVR32_GPIO.port[1].ovrc = 0x01;
+    xVal = getXPosition();
+    AVR32_GPIO.port[1].ovrs = 0x01;
+
+    while(1);
+    **/
+
+    //vl53l0x_calibrate_all();
     
     //drive_motors_ramp(DRV8711_FL, DRV8711_BR, 0, 1, 255);
     //drive_motors_ramp(DRV8711_FR, DRV8711_BL, 0, 1, 0);
 
-    //uint16_t xVal, yVal;
+    /**
+    uint16_t xVal, yVal;
 
     while(1){
-        drive_toX(610, 15);
-        led_clear(LED_1);
-        delay_ms(500);
-        led_set(LED_1);
-        delay_ms(500);
+        xVal = getXPosition();
+        yVal = getYPosition();
+
+        console_printf("Position: (%u,%u)\r\n", xVal, yVal);
+    }
+    **/
+
+    while(1){
+        drive_toX(610, 8);
     }
 
     /**

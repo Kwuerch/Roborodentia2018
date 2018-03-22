@@ -12,6 +12,13 @@ void delay_10_us(){
     }
 }
 
+void delay_65_us(){
+    int i, j;
+    for(i = 0, j = 0; i < 260; i++){
+        j++;
+    }
+}
+
 void delay_100_us(){
     int i, j;
     for(i = 0, j = 0; i < 398; i++){

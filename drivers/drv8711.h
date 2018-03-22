@@ -107,8 +107,8 @@ typedef enum DRV8711_RSTEP{
 }DRV8711_RSTEP;
 
 typedef enum DRV8711_MODE{
-    STEP_FULL= 0,
-    STEP_HALF,
+    STEP_1_1= 0,
+    STEP_1_2,
     STEP_1_4,
     STEP_1_8,
     STEP_1_16,
