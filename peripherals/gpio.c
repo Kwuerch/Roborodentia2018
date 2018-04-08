@@ -43,6 +43,14 @@ void GPIO_INIT(){
     gi.type = GPIO_OUTPUT;
     gi.port = PORT_D;
     gpio_init(&gi);
+
+    /** PWM Outputs **/
+    gi.pins = GPIO_PIN_9 | GPIO_PIN_11 | GPIO_PIN_13 | GPIO_PIN_15;
+    gi.type = GPIO_AF;
+    gi.port = PORT_B;
+    gi.af = FUNC_C;
+    gpio_init(&gi);
+
 }
 
 void gpio_init(gpioInit* gi){
