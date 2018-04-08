@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "board.h"
+#include "brushless.h"
 #include "flash.h"
 #include "pm.h"
 #include "pwm.h"
@@ -96,9 +97,15 @@ int main(void){
 
     init_board();
     init_drivers();
- 
+
     console_printf("Hello\r\n");
     led_set(LED_1 | LED_3);
+
+    brushless_set_speed(0);
+    delay_ms(5000);
+    brushless_set_speed(255);
+    
+
     
     while(!btn_is_pressed(BTN_1));
 

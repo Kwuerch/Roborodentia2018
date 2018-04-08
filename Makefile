@@ -41,7 +41,8 @@ SOURCES += $(DRIVERS)/console.c \
 			$(DRIVERS)/delay.c \
 			$(DRIVERS)/motors.c \
 			$(DRIVERS)/led.c \
-			$(DRIVERS)/btn.c
+			$(DRIVERS)/btn.c \
+			$(DRIVERS)/brushless.c
 
 SOURCES += $(VL53L0X)/core/src/vl53l0x_api.c \
 			$(VL53L0X)/core/src/vl53l0x_api_calibration.c \

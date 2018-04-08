@@ -1,4 +1,4 @@
-public class genSpeedLut{
+public class genSpeedLutMotor{
    private static final int LOW_FREQ = 490;
    private static final int HIGH_FREQ = 4000;
    private static final int LUT_SIZE = 256;
