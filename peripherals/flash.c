@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include "console.h"
 #include "flash.h"
+#include "led.h"
+#include "delay.h"
 
 void flashcdw_issue_command(unsigned int command)
 {
@@ -112,5 +114,42 @@ void flash_write(uint8_t* data, uint8_t size){
     if(writeBuf){
         //console_printf("writing buf %c %c %c %c", (char)buf[3], (char)buf[2], (char)buf[1], (char)buf[0]);
         write_word((uint32_t)buf[0]);
+    }
+}
+
+void print_flash(){
+    led_set(LED_1 | LED_4);
+
+    uint32_t* flashAddr = FLASH_DEBUG_START;
+    uint32_t word;
+    int byteOffset;
+    uint8_t byte;
+
+    while(flashAddr < MAX_FLASH){
+        word = (*flashAddr >> byteOffset) & 0xFF;
+        console_printf("The num %u\r\n", word);
+
+        for(byteOffset = 24; byteOffset > -1; byteOffset -= 8){
+            byte = (word >> byteOffset) & 0xFF;
+
+            if(byte == 0xFF){
+                break; 
+            }
+
+            console_print((char)(byte));
+        }
+
+        if(byte == 0xFF){
+            break;
+        }
+
+        flashAddr++;
+    }
+
+    while(1){
+        led_set(LED_1 | LED_4);
+        delay_ms(500);
+        led_clear(LED_1 | LED_4);
+        delay_ms(500);
     }
 }
