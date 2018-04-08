@@ -20,214 +20,100 @@
 #include "motors.h"
 #include "led.h"
 #include "btn.h"
+#include "state.h"
 
-typedef enum STATE{
-    STATE_S1,
-    STATE_S2,
-    STATE_SS12,
-    STATE_S3,
-    STATE_S4,
-    STATE_SS34,
-    STATE_R1,
-    STATE_R2,
-    STATE_A,
-    STATE_B,
-    STATE_C,
-    STATE_D
-}STATE;
-/** STATES are defined by the Waypoint they are trying to reach **/
+typedef enum actionType{
+    MOVE, SHOOT
+}actionType_t;
 
- /*************S****************************S************
- *                                                      *
- *            S3           SS34            S4           *
- *                                                      *
- *                                                      *
- *                                                      *
- *                                                      *
- *                          A                           *
- *                                                      *
- *                                                      *
- *                                                      *
- *                                                      *
- *                                                      *
- *                                                      *
- *                         R2                           *
- *                                                      *
- *            IIIIIIIIIIIIIIIIIIIIIIIIIIIIIII           *
- ********************************************************
- *                                                      *
- *                                                      *
- *                                                      *
- *                          B                           *
- *                                                      *
- *                                                      *
- *                                                      *
- *                                                      *
- *                                                      *
- *                                                      *
- *                                                      *
- *                                                      *
- *                          C                           *
- *                                                      *
- *                                                      *
- *                                                      *
- ********************************************************
- *            IIIIIIIIIIIIIIIIIIIIIIIIIIIIIII           *
- *                                                      *
- *                         R1                           *
- *                                                      *
- *                                                      *
- *                                                      *
- *                                                      *
- *                                                      *
- *                          D                           *
- *                                                      *
- *                                                      *
- *                                                      *
- *                                                      *
- *                                                      *
- *          S1            SS12              S2          *
- *                                                      *
- ************S*******************************S**********/
+typedef struct action{
+    actionType_t actionType;
+    int arg1;
+    int arg2;
+}action_t;
+
+/** Actions and Their Arguments
+    actionType arg1 arg2
+    MOVE       x    y
+    SHOOT      spd  n/a 
+**/
+
+#define MOVE_TOL 5 
+
+#define WAY_S1_X 0
+#define WAY_S1_Y 0
+#define WAY_S2_X 0
+#define WAY_S2_Y 0
+#define WAY_SS12_X 0
+#define WAY_SS12_Y 0
+#define WAY_S3_X 0
+#define WAY_S3_Y 0
+#define WAY_S4_X 0
+#define WAY_S4_Y 0
+#define WAY_SS34_X 0
+#define WAY_SS34_Y 0
+#define WAY_A_X 0
+#define WAY_A_Y 0
+#define WAY_B_X 0
+#define WAY_B_Y 0
+#define WAY_C_X 0
+#define WAY_C_Y 0
+#define WAY_D_X 0
+#define WAY_D_Y 0
+
+action_t actions[14] = {
+    { MOVE, WAY_SS12_X, WAY_SS12_Y },
+    { MOVE, WAY_S1_X, WAY_S1_Y },
+    { MOVE, WAY_S2_X, WAY_S2_Y },
+    { MOVE, WAY_D_X, WAY_D_Y },
+    { SHOOT, 128, 0 },
+    { MOVE, WAY_A_X, WAY_A_Y },
+    { SHOOT, 128, 0 },
+
+    { MOVE, WAY_SS34_X, WAY_SS34_Y },
+    { MOVE, WAY_S3_X, WAY_S3_Y },
+    { MOVE, WAY_S4_X, WAY_S4_Y },
+    { MOVE, WAY_B_X, WAY_B_Y },
+    { SHOOT, 128, 0 },
+    { MOVE, WAY_C_X, WAY_C_Y },
+    { SHOOT, 128, 0 },
+};
 
 int main(void){
-    /** This clock is not used **/
-    /** This function does not even work :( **/
-    //scif_enable_OSC32K();
+    int actionCnt = 0;
+    position_t pos = { .x = 0, .y = 0 };
 
     init_board();
     init_drivers();
 
     console_printf("Hello\r\n");
     led_set(LED_1 | LED_3);
-
-    brushless_set_speed(0);
-    delay_ms(5000);
-    brushless_set_speed(255);
-    
-
     
     while(!btn_is_pressed(BTN_1));
 
-    /**
-    AVR32_GPIO.port[1].oders = 0x01;
-    AVR32_GPIO.port[1].ovrc = 0x01;
-    AVR32_GPIO.port[1].gpers = 0x01;
+    /** Start Measurements **/
+    vl53l0x_start();
 
-    uint16_t xVal;
-    AVR32_GPIO.port[1].ovrs = 0x01;
-    delay_ms(1);
-    AVR32_GPIO.port[1].ovrc = 0x01;
-    xVal = getXPosition();
-    AVR32_GPIO.port[1].ovrs = 0x01;
-
-    while(1);
-    **/
-
-    //vl53l0x_calibrate_all();
-    
-    //drive_motors_ramp(DRV8711_FL, DRV8711_BR, 0, 1, 255);
-    //drive_motors_ramp(DRV8711_FR, DRV8711_BL, 0, 1, 0);
-
-    /**
-    uint16_t xVal, yVal;
+    stateResponse_t response = NOT_DONE;
+    action_t action = actions[actionCnt];
 
     while(1){
-        xVal = getXPosition();
-        yVal = getYPosition();
-
-        console_printf("Position: (%u,%u)\r\n", xVal, yVal);
-    }
-    **/
-
-    while(1){
-        drive_toX(610, 8);
-    }
-
-    /**
-    STATE state = STATE_SS12;
-    while(1){
-        switch(state){
-            case STATE_S1:
-                drive_to(WAY_S1_X, WAY_S1_Y, WAYPOINT_TOLERANCE);
+        updatePosition(&pos);
+        
+        switch(action.actionType){
+            case MOVE:
+                response = drive_to(action.arg1, action.arg2, MOVE_TOL, &pos);
                 break;
-            case STATE_S2:
-                drive_to(WAY_S2_X, WAY_S2_Y, WAYPOINT_TOLERANCE);
+            case SHOOT:
+                response = shoot_balls(50);
                 break;
-            case STATE_SS12:
-                drive_to(WAY_SS12_X, WAY_SS12_Y, WAYPOINT_TOLERANCE);
-                break;
-            case STATE_S3:
-                drive_to(WAY_S3_X, WAY_S3_Y, WAYPOINT_TOLERANCE);
-                break;
-            case STATE_S4:
-                drive_to(WAY_S4_X, WAY_S4_Y, WAYPOINT_TOLERANCE);
-                break;
-            case STATE_SS34:
-                drive_to(WAY_SS34_X, WAY_SS34_Y, WAYPOINT_TOLERANCE);
-                break;
-            case STATE_R1:
-                drive_to(WAY_R1_X, WAY_R1_Y, WAYPOINT_TOLERANCE);
-                break;
-            case STATE_R2:
-                drive_to(WAY_R2_X, WAY_R2_Y, WAYPOINT_TOLERANCE);
-                break;
-            case STATE_A:
-                drive_to(WAY_A_X, WAY_A_Y, WAYPOINT_TOLERANCE);
-                break;
-            case STATE_B:
-                drive_to(WAY_B_X, WAY_B_Y, WAYPOINT_TOLERANCE);
-                break;
-            case STATE_C:
-                drive_to(WAY_C_X, WAY_C_Y, WAYPOINT_TOLERANCE);
-                break;
-            case STATE_D:
-                drive_to(WAY_D_X, WAY_D_Y, WAYPOINT_TOLERANCE);
-                break;
+            default:
+                actionCnt = 0;
         }
-
-        xVal = getXPosition();
-        yVal = getYPosition();
-
-        console_printf("Current Position (%u, %u)\r\n", xVal, yVal);
-
+        
+        if(response == DONE){
+            actionCnt = (actionCnt + 1) % sizeof(actions);
+        }
     }
-    **/
 }
 
-void print_flash(){
-    led_set(LED_1 | LED_4);
-
-    uint32_t* flashAddr = FLASH_DEBUG_START;
-    uint32_t word;
-    int byteOffset;
-    uint8_t byte;
-
-    while(flashAddr < MAX_FLASH){
-        word = (*flashAddr >> byteOffset) & 0xFF;
-        console_printf("THe num %u\r\n", word);
-
-        for(byteOffset = 24; byteOffset > -1; byteOffset -= 8){
-            byte = (word >> byteOffset) & 0xFF;
-
-            if(byte == 0xFF){
-                break; 
-            }
-
-            console_print((char)(byte));
-        }
-
-        if(byte == 0xFF){
-            break;
-        }
-
-        flashAddr++;
-    }
-
-    while(1){
-        led_set(LED_1 | LED_4);
-        delay_ms(500);
-        led_clear(LED_1 | LED_4);
-        delay_ms(500);
-    }
-}

@@ -39,3 +39,19 @@ static uint16_t SPEED_LUT[256] = {
 void brushless_set_speed(uint8_t speed){
     AVR32_PWM.channel[0].cdty = SPEED_LUT[speed];
 }
+
+#define MAX_COUNT 10000
+stateResponse_t shoot_balls(uint8_t speed){
+    static uint32_t count = 0;
+
+    if(count == 0){
+        brushless_set_speed(speed);
+    }
+
+    if(++count == MAX_COUNT){
+        brushless_set_speed(0);
+        return DONE;
+    }
+
+    return NOT_DONE;
+}

@@ -299,23 +299,18 @@ void drive_motors_ramp(DRV8711_ID id1, DRV8711_ID id2, uint8_t dir1, uint8_t dir
     }
 }
 
-void drive_toX(uint16_t x, uint16_t tol){
-    int xInRange = 0;
-    uint16_t curX;
-    int difX;
+stateResponse_t drive_to(uint16_t x, uint16_t y, uint16_t tol, position_t *curPos){
+    int xInRange = 0, yInRange = 0;
+    int difX, difY;
 
-    while(!xInRange){
-        curX = getXPosition();
-
-        /** Zero values are Invalid and should not be considered **/
-        if(!curX){
-            continue;
-        }
-
-        if(curX < (x + tol) && curX > (x - tol)){
+    /** Zero values are Invalid and should not be considered **/
+    if(curPos->x){
+        if(curPos->x < (x + tol) && curPos->x > (x - tol)){
             xInRange = 1;
+            drive_motor(DRV8711_FR, 0, DRV8711_ON_TORQUE, 0);
+            drive_motor(DRV8711_BL, 1, DRV8711_ON_TORQUE, 0);
         }else{
-            difX = x - curX;
+            difX = x - curPos->x;
             if(difX > 0){
                 drive_motors_ramp(DRV8711_FR, DRV8711_BL, 0, 1, DRV8711_ON_TORQUE, difX >> 2);
             }else{
@@ -325,48 +320,23 @@ void drive_toX(uint16_t x, uint16_t tol){
         }
     }
 
-    drive_motor(DRV8711_FR, 0, DRV8711_ON_TORQUE, 0);
-    drive_motor(DRV8711_BL, 1, DRV8711_ON_TORQUE, 0);
-
-    /** Clears the Median of Three Buffer so that values are not used in futue calls **/
-    //positionBufferXClear();
-
-}
-
-/**
-void drive_to(uint16_t x, uint16_t y, uint16_t tol){
-    int xInRange = 0;
-    int yInRange = 0;
-    int curX, curY;
-    int difX, difY;
-
-    while(!(xInRange && yInRange)){
-        curX = getXPosition();
-        curY = getYPosition();
-
-        if(curX < (x + tol) && curX > (x - tol)){
-            drive_motors_ramp(DRV8711_FR, DRV8711_BL, 0, 1, 0);
-            drive_motors_ramp(DRV8711_FR, DRV8711_BL, 0, 1, 0);
-            xInRange = 1;
-
+    /** Zero values are Invalid and should not be considered **/
+    if(curPos->y){
+        if(curPos->y < (y + tol) && curPos->y > (y - tol)){
+            yInRange = 1;
+            drive_motor(DRV8711_FL, 0, DRV8711_ON_TORQUE, 0);
+            drive_motor(DRV8711_BR, 1, DRV8711_ON_TORQUE, 0);
         }else{
-            difX = x - curX;
-            if(difX > 0){
-                drive_motors_ramp(DRV8711_FR, DRV8711_BL, 0, 1, difX >> 3);
+            difY = y - curPos->y;
+            if(difY > 0){
+                drive_motors_ramp(DRV8711_FL, DRV8711_BR, 0, 1, DRV8711_ON_TORQUE, difX >> 2);
             }else{
                 difX *= -1;
-                drive_motors_ramp(DRV8711_FR, DRV8711_BL, 1, 0, difX >> 3);
+                drive_motors_ramp(DRV8711_FL, DRV8711_BR, 1, 0, DRV8711_ON_TORQUE, difX >> 2);
             }
         }
-
-        if(curY < (x + tol) && curY > (x - tol)){
-            //moveY(0, 0);
-            yInRange = 1;
-
-        }else{
-            difY = y - curY;
-            //moveY(scale[difx],  (diff > 0));
-        }
     }
+
+
+    return xInRange && yInRange ? DONE : NOT_DONE;
 }
-**/

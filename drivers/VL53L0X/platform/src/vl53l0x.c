@@ -48,7 +48,7 @@ VL53L0X_Error vl53l0x_init(VL53L0X_DEV dev){
 
 
 	if (Status == VL53L0X_ERROR_NONE){
-        Status = VL53L0X_SetDeviceMode(dev, VL53L0X_DEVICEMODE_SINGLE_RANGING);
+        Status = VL53L0X_SetDeviceMode(dev, VL53L0X_DEVICEMODE_CONTINUOUS_RANGING);
     }
 
     if(Status != VL53L0X_ERROR_NONE){
@@ -280,34 +280,33 @@ static uint8_t bufRIdx = 0;
 static uint8_t bufFIdx = 0;
 static uint8_t bufBIdx = 0;
 
-/** Returns 0 for invalid measurement **/
-uint16_t vl53l0x_measure(VL53L0X_ID id){
+/** vl53l0x_start starts the continuous measurement of all the sensors **/
+void vl53l0x_start(){
+    VL53L0X_StartMeasurement(&dev_f);
+    VL53L0X_StartMeasurement(&dev_b);
+    VL53L0X_StartMeasurement(&dev_r);
+    VL53L0X_StartMeasurement(&dev_l);
+}
+
+stateResponse_t vl53l0x_is_ready(VL53L0X_DEV dev){
     VL53L0X_Error status = VL53L0X_ERROR_NONE;
-    VL53L0X_RangingMeasurementData_t meas;
-    VL53L0X_Dev_t* dev;
+	uint8_t NewDataReady = 0;
 
-    switch(id){
-        case VL53L0X_F:
-            dev = &dev_f;
-            break;
+    status = VL53L0X_GetMeasurementDataReady(dev, &NewDataReady);
 
-        case VL53L0X_B:
-            dev = &dev_b;
-            break;
-
-        case VL53L0X_R:
-            dev = &dev_r;
-            break;
-
-        case VL53L0X_L:
-            dev = &dev_l;
-            break;
-
-        default:
-            return 0;
+    if(status != VL53L0X_ERROR_NONE){
+        vl53l0x_print_error(status);
     }
 
-    status = VL53L0X_PerformSingleRangingMeasurement(dev, &meas);
+    return NewDataReady ? DONE : NOT_DONE;
+}
+
+/** Returns 0 for invalid measurement **/
+uint16_t vl53l0x_measure(VL53L0X_DEV dev){
+    VL53L0X_Error status = VL53L0X_ERROR_NONE;
+    VL53L0X_RangingMeasurementData_t meas;
+
+    status = VL53L0X_GetRangingMeasurementData(dev, &meas);
 
     if(status != VL53L0X_ERROR_NONE){
         vl53l0x_print_error(status);
@@ -339,101 +338,47 @@ int16_t medOfThree(uint16_t arr[]){
     return arr[medIdx] > arr[minIdx] ? arr[medIdx] : arr[minIdx];
 }
 
-uint16_t getXPosition(){
-    VL53L0X_Error status = VL53L0X_ERROR_NONE;
-    VL53L0X_RangingMeasurementData_t meas;
 
-    /** Measure Left Side **/
-    status = VL53L0X_PerformSingleRangingMeasurement(&dev_l, &meas);
-    if(meas.RangeMilliMeter < MAX_RANGE){
-        bufL[bufLIdx] = meas.RangeMilliMeter;
-        bufLIdx = (bufLIdx + 1) % 3;
-    }
+uint16_t calcXPosition(uint16_t l, uint16_t r){
+    int lValid, rValid;
 
-    if(status != VL53L0X_ERROR_NONE){
-        vl53l0x_print_error(status);
-    }
-
-    /** Measure Right Side **/
-    status = VL53L0X_PerformSingleRangingMeasurement(&dev_r, &meas);
-    if(meas.RangeMilliMeter < MAX_RANGE){
-        bufR[bufRIdx] = meas.RangeMilliMeter;
-        bufRIdx = (bufRIdx + 1) % 3;
-    }
-
-    if(status != VL53L0X_ERROR_NONE){
-        vl53l0x_print_error(status);
-    }
-
-    uint16_t lVal = medOfThree(bufL);
-    uint16_t rVal = medOfThree(bufR);
+    lValid = !(l == 0 || l > MAX_RANGE);
+    rValid = !(r == 0 || r > MAX_RANGE);
 
     /** Values are Valid **/
-    if(lVal && rVal){
-        return ((lVal + BOARD_HALF_X_SIZE) + (FIELD_X_SIZE - BOARD_HALF_X_SIZE - rVal)) >> 1;
+    if(lValid && rValid){
+        return ((l + BOARD_HALF_X_SIZE) + (FIELD_X_SIZE - BOARD_HALF_X_SIZE - r)) >> 1;
     }
 
-    if(!lVal && rVal){
-        return FIELD_X_SIZE - BOARD_HALF_X_SIZE - rVal;
+    if(rValid){
+        return FIELD_X_SIZE - BOARD_HALF_X_SIZE - r;
     }
 
-    if(!rVal && lVal){
-        return lVal + BOARD_HALF_X_SIZE;
+    if(lValid){
+        return l + BOARD_HALF_X_SIZE;
     }
 
-    /** Could not Determine Position Accurately **/
+    /** Invalid Measurement by Both Sensors **/
     return 0;
 }
 
-/** TODO - Ignore values that are greater than max_range. Is this OK???? **/
-uint16_t getYPosition(){
-    VL53L0X_Error status = VL53L0X_ERROR_NONE;
-    VL53L0X_RangingMeasurementData_t meas;
+uint16_t calcYPosition(uint16_t f, uint16_t b){
+    int fValid, bValid;
 
-    /** Measure Left Side **/
-    status = VL53L0X_PerformSingleRangingMeasurement(&dev_f, &meas);
-    bufF[bufFIdx] = meas.RangeMilliMeter;
-    bufFIdx = (bufFIdx + 1) % 3;
-
-    if(status != VL53L0X_ERROR_NONE){
-        vl53l0x_print_error(status);
-    }
-
-    /** Measure Right Side **/
-    status = VL53L0X_PerformSingleRangingMeasurement(&dev_b, &meas);
-    bufB[bufBIdx] = meas.RangeMilliMeter;
-    bufBIdx = (bufBIdx + 1) % 3;
-
-    if(status != VL53L0X_ERROR_NONE){
-        vl53l0x_print_error(status);
-    }
-
-    uint16_t fVal = medOfThree(bufF);
-    uint16_t bVal = medOfThree(bufB);
-
-    //console_printf("Fvalue %i, BValue %i", fVal, bVal);
-
-    int fValid = 1, bValid = 1;
-
-    if(fVal == 0 || fVal > MAX_RANGE){
-        fValid = 0; 
-    }
-
-    if(bVal == 0 || bVal > MAX_RANGE){
-        bValid = 0;
-    }
+    fValid = !(f == 0 || f > MAX_RANGE);
+    bValid = !(b == 0 || b > MAX_RANGE);
 
     /** Values are Valid **/
     if(fValid && bValid){
-        return ((bVal + BOARD_HALF_Y_SIZE) + (FIELD_Y_SIZE - BOARD_HALF_Y_SIZE - fVal)) >> 1;
+        return ((b + BOARD_HALF_Y_SIZE) + (FIELD_Y_SIZE - BOARD_HALF_Y_SIZE - f)) >> 1;
     }
 
     if(fValid){
-        return FIELD_Y_SIZE - BOARD_HALF_Y_SIZE - fVal;
+        return FIELD_Y_SIZE - BOARD_HALF_Y_SIZE - f;
     }
 
     if(bValid){
-        return bVal + BOARD_HALF_Y_SIZE;
+        return b + BOARD_HALF_Y_SIZE;
     }
 
     /**  0 Represents Invalid measurement by both sensors **/
@@ -453,5 +398,43 @@ void positionBufferYClear(){
     for(i = 0; i < 3; i++){
         bufF[i] = 0;
         bufB[i] = 0;
+    }
+}
+
+void updatePosition(position_t *pos){
+    int chngXFlag = 0;
+    int chngYFlag = 0;
+
+    if(vl53l0x_is_ready(&dev_f) == DONE){
+        bufF[bufFIdx] = vl53l0x_measure(&dev_f);
+        bufFIdx = (bufFIdx + 1) % 3;
+        chngYFlag = 1;
+    }
+
+    if(vl53l0x_is_ready(&dev_b) == DONE){
+        bufB[bufBIdx] = vl53l0x_measure(&dev_b);
+        bufBIdx = (bufBIdx + 1) % 3;
+        chngYFlag = 1;
+    }
+
+
+    if(vl53l0x_is_ready(&dev_l) == DONE){
+        bufL[bufLIdx] = vl53l0x_measure(&dev_l);
+        bufLIdx = (bufLIdx + 1) % 3;
+        chngXFlag = 1;
+    }
+
+    if(vl53l0x_is_ready(&dev_r) == DONE){
+        bufR[bufRIdx] = vl53l0x_measure(&dev_r);
+        bufRIdx = (bufRIdx + 1) % 3;
+        chngXFlag = 1;
+    }
+
+    if(chngXFlag){
+        pos->x = calcXPosition(medOfThree(bufL), medOfThree(bufR));
+    }
+
+    if(chngYFlag){
+        pos->y = calcYPosition(medOfThree(bufF), medOfThree(bufB));
     }
 }
