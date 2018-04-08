@@ -100,7 +100,7 @@ int main(void){
     while(1){
         updatePosition(&pos);
 
-        console_printf("POS: (%u,%u)\r\n", pos.x, pos.y);
+        drive_to(610, 1220, MOVE_TOL, &pos);
         
         /**
         switch(action.actionType){

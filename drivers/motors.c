@@ -329,10 +329,10 @@ stateResponse_t drive_to(uint16_t x, uint16_t y, uint16_t tol, position_t *curPo
         }else{
             difY = y - curPos->y;
             if(difY > 0){
-                drive_motors_ramp(DRV8711_FL, DRV8711_BR, 0, 1, DRV8711_ON_TORQUE, difX >> 2);
+                drive_motors_ramp(DRV8711_FL, DRV8711_BR, 0, 1, DRV8711_ON_TORQUE, difY >> 3);
             }else{
                 difX *= -1;
-                drive_motors_ramp(DRV8711_FL, DRV8711_BR, 1, 0, DRV8711_ON_TORQUE, difX >> 2);
+                drive_motors_ramp(DRV8711_FL, DRV8711_BR, 1, 0, DRV8711_ON_TORQUE, difY >> 3);
             }
         }
     }
