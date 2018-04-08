@@ -99,7 +99,10 @@ int main(void){
 
     while(1){
         updatePosition(&pos);
+
+        console_printf("POS: (%u,%u)\r\n", pos.x, pos.y);
         
+        /**
         switch(action.actionType){
             case MOVE:
                 response = drive_to(action.arg1, action.arg2, MOVE_TOL, &pos);
@@ -114,6 +117,7 @@ int main(void){
         if(response == DONE){
             actionCnt = (actionCnt + 1) % sizeof(actions);
         }
+        **/
     }
 }
 
