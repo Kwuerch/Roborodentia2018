@@ -72,9 +72,9 @@
 /** DRV8711 Motor Driver **/
 typedef enum DRV8711_ID{
    DRV8711_FL = 0,
-   DRV8711_BR,
-   DRV8711_FR,
-   DRV8711_BL
+   DRV8711_BR = 1,
+   DRV8711_FR = 2,
+   DRV8711_BL = 3
 }DRV8711_ID;
 
 #define DRV8711_ON_TORQUE ((uint8_t)0x6E)

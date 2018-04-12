@@ -44,120 +44,84 @@ uint32_t SPEED_LUT[256] = {
     4256,4242,4227,4212,4198,4183,4169,4155
 };
 
-static uint8_t cur_speed[4] = {
-    0, 0, 0, 0
+uint8_t TORQUE_LUT[256] = {
+    0,199,198,198,197,197,196,195,
+    195,194,194,193,192,192,191,191,
+    190,190,189,188,188,187,187,186,
+    185,185,184,184,183,183,182,181,
+    181,180,180,179,178,178,177,177,
+    176,175,175,174,174,173,173,172,
+    171,171,170,170,169,168,168,167,
+    167,166,166,165,164,164,163,163,
+    162,161,161,160,160,159,158,158,
+    157,157,156,156,155,154,154,153,
+    153,152,151,151,150,150,149,149,
+    148,147,147,146,146,145,144,144,
+    143,143,142,141,141,140,140,139,
+    139,138,137,137,136,136,135,134,
+    134,133,133,132,132,131,130,130,
+    129,129,128,127,127,126,126,125,
+    125,124,123,123,122,122,121,120,
+    120,119,119,118,117,117,116,116,
+    115,115,114,113,113,112,112,111,
+    110,110,109,109,108,108,107,106,
+    106,105,105,104,103,103,102,102,
+    101,100,100,99,99,98,98,97,
+    96,96,95,95,94,93,93,92,
+    92,91,91,90,89,89,88,88,
+    87,86,86,85,85,84,83,83,
+    82,82,81,81,80,79,79,78,
+    78,77,76,76,75,75,74,74,
+    73,72,72,71,71,70,69,69,
+    68,68,67,66,66,65,65,64,
+    64,63,62,62,61,61,60,59,
+    59,58,58,57,57,56,55,55,
+    54,54,53,52,52,51,51,50
 };
 
-/**
-uint8_t SCALE_LUT[256] = {
-
-
-}
-**/
-
-void drive_motor(DRV8711_ID id, uint8_t dir, uint8_t torque, uint8_t speed){
+typedef struct motorInfo{
     uint32_t pin;
     uint8_t chan;
     volatile avr32_tc_t* tc;
+}motorInfo_t;
 
-    switch(id){
-        case DRV8711_FL:
-            pin = DRV8711_DIR_PIN_A;
-            tc = DRV8711_STEP_TC_AB; 
-            chan = DRV8711_STEP_CHAN_AC;
-            break;
-        case DRV8711_BR:
-            pin = DRV8711_DIR_PIN_B;
-            tc = DRV8711_STEP_TC_AB; 
-            chan = DRV8711_STEP_CHAN_BD;
-            break;
-        case DRV8711_FR:
-            pin = DRV8711_DIR_PIN_C;
-            tc = DRV8711_STEP_TC_CD; 
-            chan = DRV8711_STEP_CHAN_AC;
-            break;
-        case DRV8711_BL:
-            pin = DRV8711_DIR_PIN_D;
-            tc = DRV8711_STEP_TC_CD; 
-            chan = DRV8711_STEP_CHAN_BD;
-            break;
-        default:
-            return;
-    }
+motorInfo_t motors[4] = {
+    {DRV8711_DIR_PIN_A, DRV8711_STEP_CHAN_AC, DRV8711_STEP_TC_AB}, /** FL **/
+    {DRV8711_DIR_PIN_B, DRV8711_STEP_CHAN_BD, DRV8711_STEP_TC_AB}, /** BR **/
+    {DRV8711_DIR_PIN_C, DRV8711_STEP_CHAN_AC, DRV8711_STEP_TC_CD}, /** FR **/
+    {DRV8711_DIR_PIN_D, DRV8711_STEP_CHAN_BD, DRV8711_STEP_TC_CD}  /** BL **/
+};
 
+static uint8_t cur_speed[4] = {0};
 
+void drive_motor(DRV8711_ID id, uint8_t dir, uint8_t speed){
     if(dir){
-        AVR32_GPIO.port[DRV8711_DIR_PORT].ovrs = pin;
+        AVR32_GPIO.port[DRV8711_DIR_PORT].ovrs = motors[id].pin;
     }else{
-        AVR32_GPIO.port[DRV8711_DIR_PORT].ovrc = pin;
+        AVR32_GPIO.port[DRV8711_DIR_PORT].ovrc = motors[id].pin;
     }
 
-    if(speed){
-        if(cur_speed[id] == 0){
-            drv8711_write_torque(id, torque, SMPLTH_50_US);
-        }
-
-        (tc -> channel)[chan].ra = SPEED_LUT[speed];
-        (tc -> channel)[chan].rc = SPEED_LUT[speed] << 1;
-    }else{
-        (tc -> channel)[chan].ra = 0;
-        (tc -> channel)[chan].rc = 0;
-        if(cur_speed[id] != 0){
-            drv8711_write_torque(id, DRV8711_OFF_TORQUE, SMPLTH_50_US);
-        }
+    if(cur_speed[id] != speed){
+        drv8711_write_torque(id, TORQUE_LUT[speed], SMPLTH_50_US);
     }
 
-    cur_speed[id] = speed;
+    if(cur_speed[id] != speed){
+        drv8711_write_torque(id, TORQUE_LUT[speed], SMPLTH_50_US);
+        (motors[id].tc -> channel)[motors[id].chan].ra = SPEED_LUT[speed];
+        (motors[id].tc -> channel)[motors[id].chan].rc = SPEED_LUT[speed] << 1;
+
+        cur_speed[id] = speed;
+    }
 }
 
-void drive_motor_ramp(DRV8711_ID id, uint8_t dir, uint8_t torque, uint8_t speed){
-    uint32_t pin;
-    uint8_t chan;
-    volatile avr32_tc_t* tc;
-
-    switch(id){
-        case DRV8711_FL:
-            pin = DRV8711_DIR_PIN_A;
-            tc = DRV8711_STEP_TC_AB; 
-            chan = DRV8711_STEP_CHAN_AC;
-            break;
-        case DRV8711_BR:
-            pin = DRV8711_DIR_PIN_B;
-            tc = DRV8711_STEP_TC_AB; 
-            chan = DRV8711_STEP_CHAN_BD;
-            break;
-        case DRV8711_FR:
-            pin = DRV8711_DIR_PIN_C;
-            tc = DRV8711_STEP_TC_CD; 
-            chan = DRV8711_STEP_CHAN_AC;
-            break;
-        case DRV8711_BL:
-            pin = DRV8711_DIR_PIN_D;
-            tc = DRV8711_STEP_TC_CD; 
-            chan = DRV8711_STEP_CHAN_BD;
-            break;
-        default:
-            return;
-    }
-
-    if(dir){
-        AVR32_GPIO.port[DRV8711_DIR_PORT].ovrs = pin;
-    }else{
-        AVR32_GPIO.port[DRV8711_DIR_PORT].ovrc = pin;
-    }
-
-    if(speed != 0){
-        drv8711_write_torque(id, torque, SMPLTH_50_US);
-    }
-
+void drive_motor_ramp(DRV8711_ID id, uint8_t dir, uint8_t speed){
     /**
      * Ramp Up for Faster Speed
      */
     while(cur_speed[id] < speed){
         cur_speed[id]++;
-        (tc -> channel)[chan].ra = SPEED_LUT[cur_speed[id]];
-        (tc -> channel)[chan].rc = SPEED_LUT[cur_speed[id]] << 1;
-        delay_ms(2);
+        drive_motor(id, dir, speed); 
+        delay_ms(RAMP_DELAY_MS);
     }
 
     /**
@@ -165,18 +129,8 @@ void drive_motor_ramp(DRV8711_ID id, uint8_t dir, uint8_t torque, uint8_t speed)
      */
     while(cur_speed[id] > speed){
         cur_speed[id]--;
-        (tc -> channel)[chan].ra = SPEED_LUT[cur_speed[id]];
-        (tc -> channel)[chan].rc = SPEED_LUT[cur_speed[id]] << 1;
-        delay_ms(2);
-    }
-
-    /**
-     * Set Torque Low to decrease Current Consumption if Speed is Zero
-     */
-    if(cur_speed[id] == 0){
-        (tc -> channel)[chan].ra = 0;
-        (tc -> channel)[chan].rc = 0;
-        drv8711_write_torque(id, DRV8711_OFF_TORQUE, SMPLTH_50_US);
+        drive_motor(id, dir, speed); 
+        delay_ms(RAMP_DELAY_MS);
     }
 }
 
@@ -184,92 +138,18 @@ void drive_motor_ramp(DRV8711_ID id, uint8_t dir, uint8_t torque, uint8_t speed)
  * Precondition - Motors are currently running at the same speed
  *
  */
-void drive_motors_ramp(DRV8711_ID id1, DRV8711_ID id2, uint8_t dir1, uint8_t dir2, uint8_t torque, uint8_t speed){
-    uint32_t pin1;
-    uint8_t chan1;
-    volatile avr32_tc_t* tc1;
-
-    uint32_t pin2;
-    uint8_t chan2;
-    volatile avr32_tc_t* tc2;
-
-    switch(id1){
-        case DRV8711_FL:
-            pin1 = DRV8711_DIR_PIN_A;
-            tc1 = DRV8711_STEP_TC_AB; 
-            chan1 = DRV8711_STEP_CHAN_AC;
-            break;
-        case DRV8711_BR:
-            pin1 = DRV8711_DIR_PIN_B;
-            tc1 = DRV8711_STEP_TC_AB; 
-            chan1 = DRV8711_STEP_CHAN_BD;
-            break;
-        case DRV8711_FR:
-            pin1 = DRV8711_DIR_PIN_C;
-            tc1 = DRV8711_STEP_TC_CD; 
-            chan1 = DRV8711_STEP_CHAN_AC;
-            break;
-        case DRV8711_BL:
-            pin1 = DRV8711_DIR_PIN_D;
-            tc1 = DRV8711_STEP_TC_CD; 
-            chan1 = DRV8711_STEP_CHAN_BD;
-            break;
-        default:
-            return;
-    }
-
-    switch(id2){
-        case DRV8711_FL:
-            pin2 = DRV8711_DIR_PIN_A;
-            tc2 = DRV8711_STEP_TC_AB; 
-            chan2 = DRV8711_STEP_CHAN_AC;
-            break;
-        case DRV8711_BR:
-            pin2 = DRV8711_DIR_PIN_B;
-            tc2 = DRV8711_STEP_TC_AB; 
-            chan2 = DRV8711_STEP_CHAN_BD;
-            break;
-        case DRV8711_FR:
-            pin2 = DRV8711_DIR_PIN_C;
-            tc2 = DRV8711_STEP_TC_CD; 
-            chan2 = DRV8711_STEP_CHAN_AC;
-            break;
-        case DRV8711_BL:
-            pin2 = DRV8711_DIR_PIN_D;
-            tc2 = DRV8711_STEP_TC_CD; 
-            chan2 = DRV8711_STEP_CHAN_BD;
-            break;
-        default:
-            return;
-    }
-
-    if(dir1){
-        AVR32_GPIO.port[DRV8711_DIR_PORT].ovrs = pin1;
-    }else{
-        AVR32_GPIO.port[DRV8711_DIR_PORT].ovrc = pin1;
-    }
-
-    if(dir2){
-        AVR32_GPIO.port[DRV8711_DIR_PORT].ovrs = pin2;
-    }else{
-        AVR32_GPIO.port[DRV8711_DIR_PORT].ovrc = pin2;
-    }
-
-    if(speed != 0){
-        drv8711_write_torque(id1, torque, SMPLTH_50_US);
-        drv8711_write_torque(id2, torque, SMPLTH_50_US);
-    }
+void drive_motors_ramp(DRV8711_ID id1, DRV8711_ID id2, uint8_t dir1, uint8_t dir2, uint8_t speed){
+    uint8_t curSpeed = cur_speed[id1];
 
     /**
      * Ramp Up for Faster Speed
      */
-    while(cur_speed[id1] < speed){
-        cur_speed[id1]++;
-        cur_speed[id2]++;
-        (tc1 -> channel)[chan1].ra = SPEED_LUT[cur_speed[id1]];
-        (tc1 -> channel)[chan1].rc = SPEED_LUT[cur_speed[id1]] << 1;
-        (tc2 -> channel)[chan2].ra = SPEED_LUT[cur_speed[id2]];
-        (tc2 -> channel)[chan2].rc = SPEED_LUT[cur_speed[id2]] << 1;
+    while(curSpeed < speed){
+        curSpeed++;
+
+        drive_motor(id1, dir1, curSpeed);
+        drive_motor(id2, dir2, curSpeed);
+
         delay_ms(RAMP_DELAY_MS);
     }
 
@@ -277,25 +157,12 @@ void drive_motors_ramp(DRV8711_ID id1, DRV8711_ID id2, uint8_t dir1, uint8_t dir
      * Ramp Down for Slower Speed
      */
     while(cur_speed[id1] > speed){
-        cur_speed[id1]--;
-        cur_speed[id2]--;
-        (tc1 -> channel)[chan1].ra = SPEED_LUT[cur_speed[id1]];
-        (tc1 -> channel)[chan1].rc = SPEED_LUT[cur_speed[id1]] << 1;
-        (tc2 -> channel)[chan2].ra = SPEED_LUT[cur_speed[id2]];
-        (tc2 -> channel)[chan2].rc = SPEED_LUT[cur_speed[id2]] << 1;
-        delay_ms(RAMP_DELAY_MS);
-    }
+        curSpeed--;
 
-    /**
-     * Set Torque Low to decrease Current Consumption if Speed is Zero
-     */
-    if(cur_speed[id1] == 0){
-        (tc1 -> channel)[chan1].ra = 0;
-        (tc1 -> channel)[chan1].rc = 0;
-        (tc2 -> channel)[chan2].ra = 0;
-        (tc2 -> channel)[chan2].rc = 0;
-        drv8711_write_torque(id1, DRV8711_OFF_TORQUE, SMPLTH_50_US);
-        drv8711_write_torque(id2, DRV8711_OFF_TORQUE, SMPLTH_50_US);
+        drive_motor(id1, dir1, curSpeed);
+        drive_motor(id2, dir2, curSpeed);
+
+        delay_ms(RAMP_DELAY_MS);
     }
 }
 
@@ -307,15 +174,15 @@ stateResponse_t drive_to(uint16_t x, uint16_t y, uint16_t tol, position_t *curPo
     if(curPos->x){
         if(curPos->x < (x + tol) && curPos->x > (x - tol)){
             xInRange = 1;
-            drive_motor(DRV8711_FR, 0, DRV8711_ON_TORQUE, 0);
-            drive_motor(DRV8711_BL, 1, DRV8711_ON_TORQUE, 0);
+            drive_motor(DRV8711_FR, 0, 0);
+            drive_motor(DRV8711_BL, 1, 0);
         }else{
             difX = x - curPos->x;
             if(difX > 0){
-                drive_motors_ramp(DRV8711_FR, DRV8711_BL, 0, 1, DRV8711_ON_TORQUE, difX >> 2);
+                drive_motors_ramp(DRV8711_FR, DRV8711_BL, 0, 1, difX >> 2);
             }else{
                 difX *= -1;
-                drive_motors_ramp(DRV8711_FR, DRV8711_BL, 1, 0, DRV8711_ON_TORQUE, difX >> 2);
+                drive_motors_ramp(DRV8711_FR, DRV8711_BL, 1, 0, difX >> 2);
             }
         }
     }
@@ -324,15 +191,15 @@ stateResponse_t drive_to(uint16_t x, uint16_t y, uint16_t tol, position_t *curPo
     if(curPos->y){
         if(curPos->y < (y + tol) && curPos->y > (y - tol)){
             yInRange = 1;
-            drive_motor(DRV8711_FL, 0, DRV8711_ON_TORQUE, 0);
-            drive_motor(DRV8711_BR, 1, DRV8711_ON_TORQUE, 0);
+            drive_motor(DRV8711_FL, 0, 0);
+            drive_motor(DRV8711_BR, 1, 0);
         }else{
             difY = y - curPos->y;
             if(difY > 0){
-                drive_motors_ramp(DRV8711_FL, DRV8711_BR, 0, 1, DRV8711_ON_TORQUE, difY >> 3);
+                drive_motors_ramp(DRV8711_FL, DRV8711_BR, 0, 1, difY >> 3);
             }else{
                 difY *= -1;
-                drive_motors_ramp(DRV8711_FL, DRV8711_BR, 1, 0, DRV8711_ON_TORQUE, difY >> 3);
+                drive_motors_ramp(DRV8711_FL, DRV8711_BR, 1, 0, difY >> 3);
             }
         }
     }
