@@ -42,6 +42,7 @@ SOURCES += $(DRIVERS)/console.c \
 			$(DRIVERS)/motors.c \
 			$(DRIVERS)/led.c \
 			$(DRIVERS)/btn.c \
+			$(DRIVERS)/shootControl.c \
 			$(DRIVERS)/brushless.c
 
 SOURCES += $(VL53L0X)/core/src/vl53l0x_api.c \

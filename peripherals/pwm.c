@@ -12,18 +12,17 @@ void PWM_INIT(){
     AVR32_PWM.channel[0].cmr |= AVR32_PWM_CMR0_CPRE_CCK_DIV_4 << AVR32_PWM_CMR0_CPRE_OFFSET |
                                 AVR32_PWM_CMR0_CPOL_MASK;
 
-    AVR32_PWM.channel[1].cprd = PWM_CPRD_50HZ;
-    AVR32_PWM.channel[1].cdty = PWM_CDTY_1_1MS;
-    AVR32_PWM.channel[1].cmr |= AVR32_PWM_CMR0_CPRE_CCK_DIV_4 << AVR32_PWM_CMR0_CPRE_OFFSET |
-                                AVR32_PWM_CMR0_CPOL_MASK;
+    AVR32_PWM.channel[1].cprd = PWM_CPRD_FAN_25KHZ;
+    AVR32_PWM.channel[1].cdty = 0;
+    AVR32_PWM.channel[1].cmr |= AVR32_PWM_CMR0_CPOL_MASK;
 
     AVR32_PWM.channel[2].cprd = PWM_CPRD_50HZ;
-    AVR32_PWM.channel[2].cdty = PWM_CDTY_1_1MS;
+    AVR32_PWM.channel[2].cdty = 0;
     AVR32_PWM.channel[2].cmr |= AVR32_PWM_CMR0_CPRE_CCK_DIV_4 << AVR32_PWM_CMR0_CPRE_OFFSET |
                                 AVR32_PWM_CMR0_CPOL_MASK;
 
     AVR32_PWM.channel[3].cprd = PWM_CPRD_50HZ;
-    AVR32_PWM.channel[3].cdty = PWM_CDTY_1_1MS;
+    AVR32_PWM.channel[3].cdty = 0;
     AVR32_PWM.channel[3].cmr |= AVR32_PWM_CMR0_CPRE_CCK_DIV_4 << AVR32_PWM_CMR0_CPRE_OFFSET |
                                 AVR32_PWM_CMR0_CPOL_MASK;
 

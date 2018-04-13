@@ -21,6 +21,7 @@
 #include "led.h"
 #include "btn.h"
 #include "state.h"
+#include "shootControl.h"
 
 typedef enum actionType{
     MOVE, SHOOT

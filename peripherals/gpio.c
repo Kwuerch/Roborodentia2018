@@ -44,13 +44,30 @@ void GPIO_INIT(){
     gi.port = PORT_D;
     gpio_init(&gi);
 
+    /** Shooter Control **/
+    gi.pins = GPIO_PIN_29 | GPIO_PIN_30;
+    gi.type = GPIO_OUTPUT;
+    gi.port = PORT_D;
+    gpio_init(&gi);
+
+    /** Shooter Solenoid Control **/
+    gi.pins = GPIO_PIN_27;
+    gi.type = GPIO_OUTPUT;
+    gi.port = PORT_D;
+    gpio_init(&gi);
+
+    /** Shooter Stall Control **/
+    gi.pins = GPIO_PIN_28;
+    gi.type = GPIO_INPUT_PU;
+    gi.port = PORT_D;
+    gpio_init(&gi);
+
     /** PWM Outputs **/
     gi.pins = GPIO_PIN_9 | GPIO_PIN_11 | GPIO_PIN_13 | GPIO_PIN_15;
     gi.type = GPIO_AF;
     gi.port = PORT_B;
     gi.af = FUNC_C;
     gpio_init(&gi);
-
 }
 
 void gpio_init(gpioInit* gi){

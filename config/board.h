@@ -137,4 +137,11 @@ typedef enum VL53L0X_ID{
 void init_board();
 void init_drivers();
 
+/** Shooter Control **/
+#define SHOOT_LOADER_PORT         3
+#define SHOOT_LOADER_PIN_FW       ((uint32_t)(1 << 29))
+#define SHOOT_LOADER_PIN_RV       ((uint32_t)(1 << 30))
+#define SHOOT_LOADER_STALL_PIN    ((uint32_t)(1 << 28))
+#define SHOOT_LOADER_PIN_SOLENOID ((uint32_t)(1 << 27))
+
 #endif
