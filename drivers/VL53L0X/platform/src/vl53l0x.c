@@ -308,11 +308,7 @@ uint16_t vl53l0x_measure(VL53L0X_DEV dev){
 
     status = VL53L0X_GetRangingMeasurementData(dev, &meas);
 
-    if(status != VL53L0X_ERROR_NONE){
-        vl53l0x_print_error(status);
-    }
-
-    if(meas.RangeStatus){
+    if(status != VL53L0X_ERROR_NONE || meas.RangeStatus){
         return 0;
     }
 
