@@ -62,6 +62,12 @@ void GPIO_INIT(){
     gi.port = PORT_D;
     gpio_init(&gi);
 
+    /** Wall Limit Switches **/
+    gi.pins = GPIO_PIN_25 | GPIO_PIN_26;
+    gi.type = GPIO_INPUT_PU;
+    gi.port = PORT_D;
+    gpio_init(&gi);
+
     /** PWM Outputs **/
     gi.pins = GPIO_PIN_9 | GPIO_PIN_11 | GPIO_PIN_13 | GPIO_PIN_15;
     gi.type = GPIO_AF;

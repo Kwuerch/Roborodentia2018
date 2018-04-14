@@ -16,9 +16,9 @@ void PWM_INIT(){
     AVR32_PWM.channel[1].cdty = 0;
     AVR32_PWM.channel[1].cmr |= AVR32_PWM_CMR0_CPOL_MASK;
 
-    AVR32_PWM.channel[2].cprd = PWM_CPRD_50HZ;
-    AVR32_PWM.channel[2].cdty = 0;
-    AVR32_PWM.channel[2].cmr |= AVR32_PWM_CMR0_CPRE_CCK_DIV_4 << AVR32_PWM_CMR0_CPRE_OFFSET |
+    AVR32_PWM.channel[2].cprd = PWM_CPRD_QTRHZ;
+    AVR32_PWM.channel[2].cdty = 3000;
+    AVR32_PWM.channel[2].cmr |= AVR32_PWM_CMR0_CPRE_CCK_DIV_256 << AVR32_PWM_CMR0_CPRE_OFFSET |
                                 AVR32_PWM_CMR0_CPOL_MASK;
 
     AVR32_PWM.channel[3].cprd = PWM_CPRD_50HZ;
@@ -30,4 +30,19 @@ void PWM_INIT(){
                     AVR32_PWM_ENA_CHID1_MASK |
                     AVR32_PWM_ENA_CHID2_MASK |
                     AVR32_PWM_ENA_CHID3_MASK;
+}
+
+volatile uint32_t startVal = 0;
+
+void pwmStartCount(){
+    startVal = AVR32_PWM.channel[2].ccnt;
+}
+
+uint32_t getCount(){
+    uint32_t cnt = AVR32_PWM.channel[2].ccnt;
+    if(cnt >= startVal){
+        return cnt - startVal;
+    }else{
+        return ((uint32_t)PWM_CPRD_QTRHZ - startVal) + cnt;
+    }
 }

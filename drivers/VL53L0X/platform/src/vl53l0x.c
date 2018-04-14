@@ -421,7 +421,6 @@ void enableDisableSensor(VL53L0X_ID id, int enable){
 void updatePosition(position_t *pos){
     int chngXFlag = 0;
     int chngYFlag = 0;
-    uint16_t val;
 
     if(vl53l0x_is_ready(&dev_f) == DONE){
         bufF[(bufFIdx + 1) % BUF_SIZE] = vl53l0x_measure(&dev_f, bufF[bufFIdx]); 

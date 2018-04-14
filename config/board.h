@@ -149,4 +149,8 @@ void init_drivers();
 #define SHOOT_LOADER_STALL_PIN    ((uint32_t)(1 << 28))
 #define SHOOT_LOADER_PIN_SOLENOID ((uint32_t)(1 << 27))
 
+#define LIMIT_PORT_PIN  3 
+#define LIMIT_BACK_PIN  ((uint32_t)(1 << 25))
+#define LIMIT_FRONT_PIN ((uint32_t)(1 << 26))
+
 #endif
