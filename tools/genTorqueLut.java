@@ -1,6 +1,6 @@
 public class genTorqueLut{
    public static void main(String[] args){
-      genLutHighToLow(200, 50, 256, true);
+      genLutLowToHigh(100, 200, 256, false);
    }
 
    /** zeroStart means the value LUT[0] is 0 no matter what **/

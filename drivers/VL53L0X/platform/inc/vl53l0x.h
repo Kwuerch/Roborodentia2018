@@ -29,6 +29,8 @@ void vl53l0x_init_all();
 
 void vl53l0x_start();
 
+void enableDisableSensor(VL53L0X_ID id, int enable);
+
 uint16_t calcXPosition(uint16_t l, uint16_t r);
 uint16_t calcYPosition(uint16_t f, uint16_t b);
 

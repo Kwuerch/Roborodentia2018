@@ -7,10 +7,10 @@
 
 VL53L0X_Error vl53l0x_set_address(VL53L0X_DEV dev, uint8_t addr);
 
-VL53L0X_Dev_t dev_f = {.I2cDevAddr = VL53L0X_ADDR_F, .pin = VL53L0X_SD_PIN_F};
-VL53L0X_Dev_t dev_b = {.I2cDevAddr = VL53L0X_ADDR_B, .pin = VL53L0X_SD_PIN_B};
-VL53L0X_Dev_t dev_r = {.I2cDevAddr = VL53L0X_ADDR_R, .pin = VL53L0X_SD_PIN_R};
-VL53L0X_Dev_t dev_l = {.I2cDevAddr = VL53L0X_ADDR_L, .pin = VL53L0X_SD_PIN_L};
+VL53L0X_Dev_t dev_f = {.I2cDevAddr = VL53L0X_ADDR_F, .pin = VL53L0X_SD_PIN_F, .enable = 1};
+VL53L0X_Dev_t dev_b = {.I2cDevAddr = VL53L0X_ADDR_B, .pin = VL53L0X_SD_PIN_B, .enable = 1};
+VL53L0X_Dev_t dev_r = {.I2cDevAddr = VL53L0X_ADDR_R, .pin = VL53L0X_SD_PIN_R, .enable = 1};
+VL53L0X_Dev_t dev_l = {.I2cDevAddr = VL53L0X_ADDR_L, .pin = VL53L0X_SD_PIN_L, .enable = 1};
 
 VL53L0X_Error vl53l0x_init(VL53L0X_DEV dev){
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
@@ -271,10 +271,11 @@ void vl53l0x_init_all(){
     vl53l0x_init_dev(VL53L0X_L);
 }
 
-static uint16_t bufL[3];
-static uint16_t bufR[3];
-static uint16_t bufF[3];
-static uint16_t bufB[3];
+static uint16_t bufL[4] = {0, 0, 0, START_L};
+static uint16_t bufR[4] = {0, 0, 0, START_R};
+static uint16_t bufF[4] = {0, 0, 0, START_F};
+static uint16_t bufB[4] = {0, 0, 0, START_B};
+
 static uint8_t bufLIdx = 0;
 static uint8_t bufRIdx = 0;
 static uint8_t bufFIdx = 0;
@@ -302,15 +303,16 @@ stateResponse_t vl53l0x_is_ready(VL53L0X_DEV dev){
 }
 
 /** Returns 0 for invalid measurement **/
-uint16_t vl53l0x_measure(VL53L0X_DEV dev){
+uint16_t vl53l0x_measure(VL53L0X_DEV dev, uint16_t preVal){
     VL53L0X_Error status = VL53L0X_ERROR_NONE;
     VL53L0X_RangingMeasurementData_t meas;
 
     status = VL53L0X_GetRangingMeasurementData(dev, &meas);
 
-    if(status != VL53L0X_ERROR_NONE || meas.RangeStatus){
+    if(status != VL53L0X_ERROR_NONE || meas.RangeStatus || !dev->enable){
         return 0;
     }
+
 
     return meas.RangeMilliMeter;
 }
@@ -381,9 +383,11 @@ uint16_t calcYPosition(uint16_t f, uint16_t b){
     return 0;
 }
 
+#define BUF_SIZE 3
+
 void positionBufferXClear(){
     int i = 0;
-    for(i = 0; i < 3; i++){
+    for(i = 0; i < BUF_SIZE; i++){
         bufL[i] = 0;
         bufR[i] = 0;
     }
@@ -391,46 +395,70 @@ void positionBufferXClear(){
 
 void positionBufferYClear(){
     int i = 0;
-    for(i = 0; i < 3; i++){
+    for(i = 0; i < BUF_SIZE; i++){
         bufF[i] = 0;
         bufB[i] = 0;
+    }
+}
+
+void enableDisableSensor(VL53L0X_ID id, int enable){
+    switch(id){
+        case VL53L0X_F:
+            dev_f.enable = enable;
+            break;
+        case VL53L0X_B:
+            dev_b.enable = enable;
+            break;
+        case VL53L0X_L:
+            dev_l.enable = enable;
+            break;
+        case VL53L0X_R:
+            dev_r.enable = enable;
+            break;
     }
 }
 
 void updatePosition(position_t *pos){
     int chngXFlag = 0;
     int chngYFlag = 0;
+    uint16_t val;
 
     if(vl53l0x_is_ready(&dev_f) == DONE){
-        bufF[bufFIdx] = vl53l0x_measure(&dev_f);
-        bufFIdx = (bufFIdx + 1) % 3;
+        bufF[(bufFIdx + 1) % BUF_SIZE] = vl53l0x_measure(&dev_f, bufF[bufFIdx]); 
+        bufFIdx = (bufFIdx + 1) % BUF_SIZE;
         chngYFlag = 1;
     }
 
     if(vl53l0x_is_ready(&dev_b) == DONE){
-        bufB[bufBIdx] = vl53l0x_measure(&dev_b);
-        bufBIdx = (bufBIdx + 1) % 3;
+        bufB[(bufBIdx + 1) % BUF_SIZE] = vl53l0x_measure(&dev_b, bufB[bufBIdx]); 
+        bufBIdx = (bufBIdx + 1) % BUF_SIZE;
         chngYFlag = 1;
     }
 
 
     if(vl53l0x_is_ready(&dev_l) == DONE){
-        bufL[bufLIdx] = vl53l0x_measure(&dev_l);
-        bufLIdx = (bufLIdx + 1) % 3;
+        bufL[(bufLIdx + 1) % BUF_SIZE] = vl53l0x_measure(&dev_l, bufL[bufLIdx]); 
+        bufLIdx = (bufLIdx + 1) % BUF_SIZE;
         chngXFlag = 1;
     }
 
     if(vl53l0x_is_ready(&dev_r) == DONE){
-        bufR[bufRIdx] = vl53l0x_measure(&dev_r);
-        bufRIdx = (bufRIdx + 1) % 3;
+        bufR[(bufRIdx + 1) % BUF_SIZE] = vl53l0x_measure(&dev_r, bufR[bufRIdx]); 
+        bufRIdx = (bufRIdx + 1) % BUF_SIZE;
         chngXFlag = 1;
     }
 
     if(chngXFlag){
-        pos->x = calcXPosition(medOfThree(bufL), medOfThree(bufR));
+        // Store med of three as 4th element
+        bufL[3] = medOfThree(bufL);
+        bufR[3] = medOfThree(bufR);
+        pos->x = calcXPosition(bufL[3], bufR[3]);
     }
 
     if(chngYFlag){
-        pos->y = calcYPosition(medOfThree(bufF), medOfThree(bufB));
+        // Store med of three as 4th element
+        bufF[3] = medOfThree(bufF);
+        bufB[3] = medOfThree(bufB);
+        pos->y = calcYPosition(bufF[3], bufB[3]);
     }
 }

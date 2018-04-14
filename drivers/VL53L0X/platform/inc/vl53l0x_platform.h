@@ -58,7 +58,8 @@ typedef struct {
 
     /*!< user specific field */
     uint8_t   I2cDevAddr;                /*!< i2c device address user specific field */
-    uint32_t   pin;
+    uint32_t  pin;
+    int       enable; 
 
 } VL53L0X_Dev_t;
 

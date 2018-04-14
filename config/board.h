@@ -13,6 +13,11 @@
 #define FIELD_Y_SIZE 2438
 #define MAX_RANGE 1300
 
+#define START_L 150
+#define START_R 1070
+#define START_B 150
+#define START_F 1150
+
 /** TC0 **/
 #define TC0_A_PORT (AVR32_TC0_A0_0_0_PIN / 32)
 #define TC0_A_PIN  (1 << (AVR32_TC0_A0_0_0_PIN % 32))
