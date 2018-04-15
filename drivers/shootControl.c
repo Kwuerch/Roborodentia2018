@@ -72,7 +72,7 @@ stateResponse_t shootBalls(){
 void setResetFan(uint8_t set){
     if(set){
         /** 60% Duty Cycle **/
-        AVR32_PWM.channel[1].cdty = PWM_CDTY_FAN_60PD;
+        AVR32_PWM.channel[1].cdty = PWM_CDTY_FAN_80PD;
     }else{
         /** 0% Duty Cycle **/
         AVR32_PWM.channel[1].cdty = 0;

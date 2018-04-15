@@ -64,17 +64,18 @@ typedef struct action{
 #define WAY_S3_X 325
 #define WAY_S3_Y 2200 
 
-#define WAY_S4_X 995 
+#define WAY_S4_X 1000
 #define WAY_S4_Y 2200 
 
-#define NUM_ACTIONS 22
+#define NUM_ACTIONS 23
 
 action_t actions[NUM_ACTIONS] = {
     { MOVE_TO_WALL_RV, 0, 0 },
     { MOVE_ALONG_WALL_SHOOT_RV, WAY_S1_X, 0 },
     { MOVE_ALONG_WALL_RV, WAY_S2_X, 0 },
+    { MOVE_ALONG_WALL_RV, WAY_SS12_X, 0 },
+    { MOVE_TO_WALL_RV, 0, 0 },
 
-    { MOVE, WAY_SS12_X, WAY_SS12_Y },
     { RAMP_UFW, 0, 0 },
     { ENABLE_F, 0, 0 },
 
@@ -88,7 +89,7 @@ action_t actions[NUM_ACTIONS] = {
     { MOVE_ALONG_WALL_SHOOT_FW, WAY_S3_X, 0 },
     { MOVE_ALONG_WALL_FW, WAY_S4_X, 0 },
 
-    { MOVE, WAY_SS34_X, WAY_SS34_Y },
+    { MOVE_ALONG_WALL_FW, WAY_SS34_X, 0 },
     { RAMP_URV, 0, 0 },
     { ENABLE_B, 0, 0 },
 
@@ -238,7 +239,7 @@ int main(void){
     led_set(LED_1 | LED_3);
 
     setResetFan(1);
-    brushless_set_speed(15);
+    brushless_set_speed(14);
     
     /**
      * Wait until BTN_1 or BTN_2 is pressed
