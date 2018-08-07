@@ -1,8 +1,8 @@
 SHARED = /home/kyle/shared
 MPART = uc3c0512c
-MAIN = krombopulos.elf
 
 BUILDDIR = build
+MAIN = $(BUILDDIR)/krombopulos.elf
 
 CC = avr32-gcc
 CFLAGS = -Wall -mpart=$(MPART) $(INCLUDES)
@@ -73,4 +73,4 @@ debug:
 	sudo screen /dev/ttyUSB0 41118
 
 clean:
-	rm -r $(BUILD)/*
+	rm -r $(BUILD)
