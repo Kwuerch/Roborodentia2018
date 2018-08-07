@@ -44,7 +44,8 @@ SOURCES += $(DRIVERS)/console.c \
 			$(DRIVERS)/btn.c \
 			$(DRIVERS)/shootControl.c \
 			$(DRIVERS)/brushless.c \
-			$(DRIVERS)/gameStateHandler.c
+			$(DRIVERS)/gameStateHandler.c \
+			$(DRIVERS)/action.c
 
 SOURCES += $(VL53L0X)/core/src/vl53l0x_api.c \
 			$(VL53L0X)/core/src/vl53l0x_api_calibration.c \
