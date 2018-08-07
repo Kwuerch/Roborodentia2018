@@ -22,6 +22,8 @@
 #include "btn.h"
 #include "state.h"
 #include "shootControl.h"
+#include "waypoints.h"
+#include "gameStateHandler.h"
 
 typedef enum actionType{
     MOVE, SHOOT, MOVE_SHOOT, DISABLE_F, DISABLE_B, ENABLE_F, ENABLE_B, RAMP_UFW, RAMP_URV, RAMP_DFW, RAMP_DRV, MOVE_ALONG_WALL_FW, MOVE_ALONG_WALL_RV, MOVE_ALONG_WALL_SHOOT_FW, MOVE_ALONG_WALL_SHOOT_RV, MOVE_TO_WALL_RV, MOVE_TO_WALL_FW
@@ -39,34 +41,7 @@ typedef struct action{
     SHOOT      spd  n/a 
 **/
 
-
-
 #define MOVE_TOL 7 
-
-#define WAY_S1_X 325
-#define WAY_S1_Y 200 
-
-#define WAY_S2_X 995
-#define WAY_S2_Y 200 
-
-#define WAY_SS12_X 610 
-#define WAY_SS12_Y 200 
-
-#define WAY_C_X 610 
-#define WAY_C_Y 984 
-
-#define WAY_B_X 610 
-#define WAY_B_Y 1300 
-
-#define WAY_SS34_X 610
-#define WAY_SS34_Y 2200 
-
-#define WAY_S3_X 325
-#define WAY_S3_Y 2200 
-
-#define WAY_S4_X 1000
-#define WAY_S4_Y 2200 
-
 #define NUM_ACTIONS 23
 
 action_t actions[NUM_ACTIONS] = {
@@ -100,131 +75,6 @@ action_t actions[NUM_ACTIONS] = {
 
     { MOVE, WAY_SS12_X, WAY_SS12_Y }
 };
-
-stateResponse_t driveToWallFW(){
-    static int first = 1;
-
-    if(first){
-        drive_motor(DRV8711_FL, 0, 50);
-        drive_motor(DRV8711_BR, 1, 50);
-        first = 0;
-    }else{
-        if(!(AVR32_GPIO.port[BTN_PORT].pvr & LIMIT_FRONT_PIN)){
-            drive_motor(DRV8711_FL, 0, 0);
-            drive_motor(DRV8711_BR, 1, 0);
-            first = 1;
-            return DONE;
-        }
-    }
-
-    return NOT_DONE;
-}
-
-stateResponse_t driveToWallRV(){
-    static int first = 1;
-
-    if(first){
-        drive_motor(DRV8711_FL, 1, 50);
-        drive_motor(DRV8711_BR, 0, 50);
-        first = 0;
-    }else{
-        if(!(AVR32_GPIO.port[BTN_PORT].pvr & LIMIT_BACK_PIN)){
-            drive_motor(DRV8711_FL, 1, 0);
-            drive_motor(DRV8711_BR, 0, 0);
-            first = 1;
-            return DONE;
-        }
-    }
-
-    return NOT_DONE;
-}
-
-void driveAlongWallFW(){
-    if(AVR32_GPIO.port[BTN_PORT].pvr & LIMIT_FRONT_PIN){
-        drive_motor(DRV8711_FL, 0, 50);
-        drive_motor(DRV8711_BR, 1, 50);
-    }else{
-        drive_motor(DRV8711_FL, 0, 0);
-        drive_motor(DRV8711_BR, 1, 0);
-    }
-}
-
-void driveAlongWallRV(){
-    if(AVR32_GPIO.port[BTN_PORT].pvr & LIMIT_BACK_PIN){
-        drive_motor(DRV8711_FL, 1, 50);
-        drive_motor(DRV8711_BR, 0, 50);
-    }else{
-        drive_motor(DRV8711_FL, 1, 0);
-        drive_motor(DRV8711_BR, 0, 0);
-    }
-}
-
-#define WIDE_TOL 10
-stateResponse_t rampUpFW(position_t *pos){
-    static int first = 1;
-
-    if(first){
-        drive_motors_ramp(DRV8711_FL, DRV8711_BR, 0, 1, 255);
-        first = 0;
-    }
-
-    if(pos->y >= WAY_C_Y){
-        first = 1;
-        return DONE;
-    }
-
-    return NOT_DONE;
-}
-
-stateResponse_t rampUpRV(position_t *pos){
-    static int first = 1;
-
-    if(first){
-        drive_motors_ramp(DRV8711_FL, DRV8711_BR, 1, 0, 255);
-        first = 0;
-    }
-
-    if(pos->y < WAY_B_Y){
-        first = 1;
-        return DONE;
-    }
-
-    return NOT_DONE;
-}
-
-stateResponse_t rampDownFW(){
-    static int counting = 0;
-
-    if(!counting){
-        drive_motors_ramp(DRV8711_FL, DRV8711_BR, 0, 1, 255);
-        pwmStartCount();
-        counting = 1;
-    }else{
-        if(getCount() >= PWM_CNT_HALFS){
-            counting = 0;
-            return DONE;
-        }
-    }
-
-    return NOT_DONE;
-}
-
-stateResponse_t rampDownRV(){
-    static int counting = 0;
-
-    if(!counting){
-        drive_motors_ramp(DRV8711_FL, DRV8711_BR, 1, 0, 255);
-        pwmStartCount();
-        counting = 1;
-    }else{
-        if(getCount() >= PWM_CNT_HALFS){
-            counting = 0;
-            return DONE;
-        }
-    }
-
-    return NOT_DONE;
-}
 
 int main(void){
     int actionCnt = 0;
@@ -358,4 +208,3 @@ int main(void){
         }
     }
 }
-
